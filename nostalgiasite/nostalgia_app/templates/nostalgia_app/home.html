@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Nostalgia Site{% endblock %}
+
+{% block content %}
+<section class="intro">
+    <h2>Welcome to Nostalgia Site!</h2>
+    <p>Rediscover the world as it was when you graduated. Enter your graduation year below:</p>
+</section>
+
+<form method="post" action="{% url 'nostalgia_app:results' %}" class="graduation-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Take a Trip Down Memory Lane!</button>
+</form>
+
+<section class="features">
+    <h3>With Nostalgia Site, you can:</h3>
+    <ul>
+        <li>Explore major events from your graduation year</li>
+        <li>Discover how laws and facts have changed over time</li>
+        <li>Get nostalgic recommendations for music, movies, and books</li>
+        <li>Compare your memories with historical data</li>
+    </ul>
+</section>
+
+<section class="how-it-works">
+    <h3>How it works:</h3>
+    <ol>
+        <li>Enter your graduation year</li>
+        <li>View a timeline of events from that year</li>
+        <li>See how things have changed since then</li>
+        <li>Get recommendations based on your graduation year</li>
+    </ol>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any home page specific JavaScript here
+    document.addEventListener('DOMContentLoaded', function () {
+        const submitButton = document.querySelector('button[type="submit"]');
+        submitButton.addEventListener('mouseover', function () {
+            this.textContent = "Let's Go Back in Time!";
+        });
+        submitButton.addEventListener('mouseout', function () {
+            this.textContent = "Take a Trip Down Memory Lane!";
+        });
+    });
+</script>
+{% endblock %}

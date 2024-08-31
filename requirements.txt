@@ -1,0 +1,49 @@
+# Web Framework
+Django==4.2.7
+
+# Database adapter (if you're using PostgreSQL, otherwise you can remove this)
+psycopg2-binary==2.9.9
+
+# Environment variables management
+python-dotenv==1.0.0
+
+# Django REST framework (if you plan to create an API)
+djangorestframework==3.14.0
+
+# CORS headers for API requests
+django-cors-headers==4.3.0
+
+# Image processing (useful for handling user uploads)
+Pillow==10.1.0
+
+# Improved Python REPL (useful for Django shell)
+ipython==8.17.2
+
+# Testing
+pytest==7.4.3
+pytest-django==4.5.2
+
+# Code formatting and linting
+black==23.11.0
+flake8==6.1.0
+
+# Security
+django-debug-toolbar==4.2.0
+
+# Production server
+gunicorn==21.2.0
+
+# Task queue (useful for background tasks)
+celery==5.3.4
+
+# Caching
+redis==5.0.1
+
+# For generating fake data (useful for testing)
+Faker==20.1.0
+
+# Date parsing library
+python-dateutil==2.8.2
+
+# For easier static file serving
+whitenoise==6.6.0

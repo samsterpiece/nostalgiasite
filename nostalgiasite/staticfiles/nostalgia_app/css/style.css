@@ -1,0 +1,217 @@
+/* style.css */
+body {
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    background: #000000 url('/static/images/stars.gif');
+    color: #00FF00;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+h1, h2, h3 {
+    font-family: "Times New Roman", serif;
+    color: #FF00FF;
+    text-shadow: 2px 2px #0000FF;
+}
+
+a {
+    color: #FFFF00;
+    text-decoration: underline;
+}
+
+    a:hover {
+        color: #FF0000;
+        text-decoration: none;
+    }
+
+/* Header Styles */
+header {
+    background-color: #000080;
+    padding: 20px;
+    border: 3px dashed #FFFF00;
+    margin-bottom: 20px;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+    nav ul li {
+        display: inline;
+        margin: 0 10px;
+    }
+
+/* Form Styles */
+form {
+    background-color: #000080;
+    border: 3px dashed #FFFF00;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+input[type="text"], input[type="number"] {
+    background-color: #000000;
+    border: 2px solid #00FF00;
+    color: #00FF00;
+    padding: 5px;
+    font-family: "Courier New", monospace;
+}
+
+button {
+    background-color: #FF00FF;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+    button:hover {
+        background-color: #00FFFF;
+        color: #000000;
+    }
+
+/* Timeline Styles */
+#timeline-container {
+    margin-top: 40px;
+}
+
+.timeline-event {
+    background-color: #000080;
+    border: 2px solid #00FF00;
+    margin: 20px 0;
+    padding: 10px;
+    text-align: left;
+    position: relative;
+}
+
+.timeline-date {
+    position: absolute;
+    top: -15px;
+    left: 10px;
+    background-color: #FF00FF;
+    color: #FFFFFF;
+    padding: 5px 10px;
+    font-weight: bold;
+}
+
+.timeline-content h3 {
+    margin-top: 15px;
+}
+
+.outdated {
+    border-color: #FF0000;
+}
+
+.outdated-note {
+    color: #FF0000;
+    font-weight: bold;
+}
+
+/* Recommendations Styles */
+.recommendations {
+    background-color: #000080;
+    border: 3px dashed #FFFF00;
+    padding: 20px;
+    margin-top: 40px;
+}
+
+    .recommendations ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .recommendations li {
+        margin-bottom: 20px;
+    }
+
+/* Fun Facts Styles */
+.fun-facts {
+    background-color: #000080;
+    border: 3px solid #00FF00;
+    padding: 20px;
+    margin-top: 40px;
+}
+
+    .fun-facts ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+/* Share Results Styles */
+.share-results {
+    margin-top: 40px;
+}
+
+    .share-results button {
+        margin: 0 10px;
+    }
+
+/* Message Styles */
+.messages {
+    list-style: none;
+    padding: 0;
+}
+
+.message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #00FF00;
+    background-color: #000080;
+}
+
+/* Footer Styles */
+footer {
+    margin-top: 40px;
+    border-top: 2px solid #00FF00;
+    padding-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    header {
+        padding: 10px;
+    }
+
+    nav ul li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    .timeline-event {
+        padding: 15px 10px 10px;
+    }
+
+    .timeline-date {
+        position: static;
+        display: block;
+        width: fit-content;
+        margin-bottom: 10px;
+    }
+}
+
+/* Animation for blinking text */
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.blink {
+    animation: blink 1s linear infinite;
+}

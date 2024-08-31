@@ -1,0 +1,64 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostalgia Site - {% block title %}Home{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body x-data="nostalgiaApp" @mousemove="updateCursorPosition">
+    <div class="retro-cursor" :style="`left: ${cursorPosition.x}px; top: ${cursorPosition.y}px;`"></div>
+
+    <div class="under-construction">🚧 Under Construction 🚧</div>
+
+    <header>
+        <h1 x-text="displayedTitle"></h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'nostalgia_app:home' %}" @mouseenter="playHoverSound">Home</a></li>
+                <li><a href="{% url 'nostalgia_app:about' %}" @mouseenter="playHoverSound">About</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'nostalgia_app:profile' %}" @mouseenter="playHoverSound">Profile</a></li>
+                <li><a href="{% url 'nostalgia_app:logout' %}" @mouseenter="playHoverSound">Logout</a></li>
+                {% else %}
+                <li><a href="{% url 'nostalgia_app:login' %}" @mouseenter="playHoverSound">Login</a></li>
+                <li><a href="{% url 'nostalgia_app:signup' %}" @mouseenter="playHoverSound">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <div class="marquee">
+        <span>Welcome to Nostalgia Site! Relive the glory days of the early internet!</span>
+    </div>
+
+    <main>
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Nostalgia Site. All rights reserved.</p>
+        <div class="visitor-counter">You are visitor number: <span x-text="visitorCount"></span></div>
+        <div class="best-viewed">Best viewed in Netscape Navigator 4.0 or higher</div>
+        <a href="#"><img src="{% static 'images/geocities.gif' %}" alt="Hosted by GeoCities" /></a>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
