@@ -9,7 +9,7 @@
     <h3>Select a Category to Explore:</h3>
     <ul>
         {% for category in categories %}
-        <li><a href="{% url 'results' grad_year=grad_year %}?category={{ category.slug }}">{{ category.name }}</a></li>
+        <li><a href="{% url 'nostalgia_app:results' grad_year=grad_year %}?category={{ category.slug }}">{{ category.name }}</a></li>
         {% endfor %}
     </ul>
 </div>

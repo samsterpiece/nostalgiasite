@@ -5,12 +5,17 @@
 {% block content %}
 <section class="intro">
     <h2>Welcome to Nostalgia Site!</h2>
-    <p>Discover how the world has changed since you graduated. Enter your graduation year below:</p>
+    <p>Discover how the world has changed since you graduated. Select your graduation year below:</p>
 </section>
 
 <form method="post" action="{% url 'nostalgia_app:submit_year' %}" class="graduation-form">
     {% csrf_token %}
-    <input type="number" name="grad_year" min="1900" max="{{ current_year }}" required>
+    <select name="grad_year" required>
+        <option value="">Select a year</option> <!-- Add this line for the blank option -->
+        {% for year in years %}
+        <option value="{{ year }}">{{ year }}</option>
+        {% endfor %}
+    </select>
     <button type="submit">Take Me Back in Time!</button>
 </form>
 
