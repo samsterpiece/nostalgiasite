@@ -82,6 +82,7 @@ button, .submit-button {
     color: #FFFFFF;
     padding: 5px 0;
     overflow: hidden;
+    white-space: nowrap; /* Ensure text stays on the same line */
 }
 
     .marquee span {
@@ -292,20 +293,3 @@ footer {
     header {
         padding: 10px;
     }
-
-    nav ul li {
-        display: block;
-        margin: 10px 0;
-    }
-
-    .submit-fact-container {
-        padding: 10px;
-    }
-
-    .category-options {
-        flex-direction: column;
-    }
-}
-/* Admin Dashboard Styles */
-.admin-dashboard {
-    background-color: #000

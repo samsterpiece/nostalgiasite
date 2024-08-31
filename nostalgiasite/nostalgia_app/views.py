@@ -23,7 +23,8 @@ def is_admin(user):
 
 def home(request):
     current_year = timezone.now().year
-    return render(request, 'nostalgia_app/home.html', {'current_year': current_year})
+    years = list(range(1930, current_year + 1))  # Generate a list of years from 1930 to the current year
+    return render(request, 'nostalgia_app/home.html', {'current_year': current_year, 'years': years})
 
 def submit_year(request):
     if request.method == 'POST':
