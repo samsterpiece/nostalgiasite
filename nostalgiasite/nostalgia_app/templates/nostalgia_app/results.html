@@ -9,19 +9,21 @@
     <h3>Select a Category to Explore:</h3>
     <div class="category-buttons">
         {% for category in categories %}
-            <a href="?category={{ category.name }}" class="category-button {% if category.name == selected_category %}active{% endif %}">{{ category.name }}</a>
+            <button class="category-button {% if category.name == selected_category %}active{% endif %}" data-category="{{ category.name }}">
+                {{ category.name }}
+            </button>
         {% endfor %}
     </div>
 </div>
 
-<div id="facts-container">
+<div id="facts-container" style="display: none;">
     {% if facts %}
         {% for fact in facts %}
             <div class="fact-item">
                 <h4>{{ fact.year }} - {{ fact.title }}</h4>
                 <p>{{ fact.description }}</p>
                 <p>Categories: {{ fact.categories|join:", " }}</p>
-                <a href="{{ fact.source_url }}" target="_blank">Learn More</a>
+                <a href="{{ fact.source_url }}" target="_blank" rel="noopener noreferrer">Learn More</a>
             </div>
         {% endfor %}
     {% else %}
@@ -31,55 +33,62 @@
 
 <div class="significant-events">
     <h3>Significant Events Since {{ grad_year }}</h3>
-    <!-- Implement significant events section here -->
+    {% if significant_events %}
+        <ul>
+            {% for event in significant_events %}
+                <li>{{ event }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no significant events to display for this time period.</p>
+    {% endif %}
 </div>
 
 <div class="recommendations">
     <h3>Recommended Reading to Catch Up</h3>
-    <!-- Implement recommendations section here -->
+    {% if recommended_reading %}
+        <ul>
+            {% for book in recommended_reading %}
+                <li>{{ book }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no reading recommendations for this time period.</p>
+    {% endif %}
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-    .category-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    .category-button {
-        padding: 10px 15px;
-        background-color: #000080;
-        color: #FFFF00;
-        text-decoration: none;
-        border: 2px solid #FFFF00;
-    }
-    .category-button.active {
-        background-color: #FFFF00;
-        color: #000080;
-    }
-    .fact-item {
-        background-color: #000080;
-        border: 2px solid #00FF00;
-        padding: 15px;
-        margin-bottom: 15px;
-    }
-</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const categoryButtons = document.querySelectorAll('.category-button');
-        categoryButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const category = this.getAttribute('href').split('=')[1];
-                window.location.href = `?category=${category}`;
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryButtons = document.querySelectorAll('.category-button');
+    const factsContainer = document.getElementById('facts-container');
+
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+
+            // Remove active class from all buttons
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Add active class to clicked button
+            this.classList.add('active');
+
+            // Show facts container
+            factsContainer.style.display = 'block';
+
+            // Filter facts based on category
+            const facts = document.querySelectorAll('.fact-item');
+            facts.forEach(fact => {
+                if (fact.textContent.includes(category)) {
+                    fact.style.display = 'block';
+                } else {
+                    fact.style.display = 'none';
+                }
             });
         });
     });
+});
 </script>
 {% endblock %}

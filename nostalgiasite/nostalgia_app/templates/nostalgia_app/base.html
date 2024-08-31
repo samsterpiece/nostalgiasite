@@ -10,6 +10,8 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <div class="under-construction">🚧 Under Construction 🚧</div>
+
     <header>
         <h1>🕰️ Nostalgia Site 🕰️</h1>
         <nav>
@@ -17,15 +19,15 @@
                 <li><a href="{% url 'nostalgia_app:home' %}">Home</a></li>
                 <li><a href="{% url 'nostalgia_app:about' %}">About</a></li>
                 {% if user.is_authenticated %}
-                <li><a href="{% url 'nostalgia_app:profile' %}">Profile</a></li>
-                <li><a href="{% url 'nostalgia_app:submit_fact' %}">Submit Fact</a></li>
-                <li><a href="{% url 'nostalgia_app:logout' %}">Logout</a></li>
-                {% if user.is_superuser %}
-                <li><a href="{% url 'nostalgia_app:admin_dashboard' %}">Admin Dashboard</a></li>
-                {% endif %}
+                    <li><a href="{% url 'nostalgia_app:profile' %}">Profile</a></li>
+                    <li><a href="{% url 'nostalgia_app:submit_fact' %}">Submit Fact</a></li>
+                    <li><a href="{% url 'nostalgia_app:logout' %}">Logout</a></li>
+                    {% if user.is_superuser %}
+                        <li><a href="{% url 'nostalgia_app:admin_dashboard' %}">Admin Dashboard</a></li>
+                    {% endif %}
                 {% else %}
-                <li><a href="{% url 'nostalgia_app:login' %}">Login</a></li>
-                <li><a href="{% url 'nostalgia_app:signup' %}">Sign Up</a></li>
+                    <li><a href="{% url 'nostalgia_app:login' %}">Login</a></li>
+                    <li><a href="{% url 'nostalgia_app:signup' %}">Sign Up</a></li>
                 {% endif %}
             </ul>
         </nav>
@@ -55,8 +57,6 @@
     <footer>
         <p>&copy; 2024 Nostalgia Site. All rights reserved.</p>
     </footer>
-
-    <div class="under-construction">🚧 Under Construction 🚧</div>
 
     <script src="{% static 'nostalgia_app/js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
