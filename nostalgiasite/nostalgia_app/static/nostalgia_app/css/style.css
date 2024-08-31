@@ -198,3 +198,45 @@ footer {
     background-color: #000080;
     border-top: 3px dashed #FFFF00;
 }
+
+.previous-searches {
+    background-color: #000080;
+    border: 2px solid #00FF00;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.previous-searches h3 {
+    color: #FF00FF;
+    text-shadow: 1px 1px #0000FF;
+    margin-top: 0;
+}
+
+.previous-searches ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.previous-searches li a {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #000080;
+    color: #FFFF00;
+    text-decoration: none;
+    border: 1px solid #FFFF00;
+}
+
+.previous-searches li a:hover {
+    background-color: #FFFF00;
+    color: #000080;
+}
+
+@media (max-width: 600px) {
+    .previous-searches ul {
+        flex-direction: column;
+    }
+}

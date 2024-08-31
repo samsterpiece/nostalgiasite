@@ -5,6 +5,17 @@
 {% block content %}
 <h2>Knowledge Time Capsule: From {{ grad_year }} to 2024</h2>
 
+<div class="previous-searches">
+    <h3>Previous Searches:</h3>
+    <ul>
+        {% for year in searched_years %}
+            {% if year != grad_year %}
+                <li><a href="{% url 'nostalgia_app:results' grad_year=year %}">{{ year }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+
 <div class="category-selection">
     <h3>Select a Category to Explore:</h3>
     <div class="category-buttons">

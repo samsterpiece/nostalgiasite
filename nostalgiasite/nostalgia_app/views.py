@@ -42,7 +42,7 @@ def results(request, grad_year):
     # Fetch approved user-submitted facts
     user_facts = UserSubmittedFact.objects.filter(
         status='approved',
-        year__gte=grad_year
+        year=grad_year
     )
 
     # Fetch API results (placeholder for now)
@@ -55,11 +55,23 @@ def results(request, grad_year):
     if selected_category:
         all_facts = [fact for fact in all_facts if selected_category in fact['categories']]
 
+    # Get or initialize the list of searched years from the session
+    searched_years = request.session.get('searched_years', [])
+
+    # Add the current year to the list if it's not already there
+    if grad_year not in searched_years:
+        searched_years.insert(0, grad_year)  # Add to the beginning of the list
+        searched_years = searched_years[:5]  # Keep only the 5 most recent searches
+        request.session['searched_years'] = searched_years
+
     context = {
         'grad_year': grad_year,
         'categories': categories,
         'selected_category': selected_category,
         'facts': all_facts,
+        'significant_events': get_significant_events(grad_year),
+        'recommended_reading': get_recommended_reading(grad_year),
+        'searched_years': searched_years,
     }
     return render(request, 'nostalgia_app/results.html', context)
 
@@ -179,6 +191,16 @@ def reject_fact(request, fact_id):
     fact.delete()
     messages.success(request, f"Fact '{fact.title}' has been rejected and deleted.")
     return redirect('nostalgia_app:admin_dashboard')
+
+def get_significant_events(year):
+    # Placeholder function to get significant events for a specific year
+    # Replace this with actual logic to fetch events from your database or API
+    return []
+
+def get_recommended_reading(year):
+    # Placeholder function to get recommended reading for a specific year
+    # Replace this with actual logic to fetch recommendations from your database or API
+    return []
 
 def fetch_news_data(year):
     # Implement API call to News API
