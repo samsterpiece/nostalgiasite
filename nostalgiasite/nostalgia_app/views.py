@@ -36,43 +36,56 @@ def submit_year(request):
     return redirect('nostalgia_app:home')
 
 def results(request, grad_year):
-    try:
-        current_year = timezone.now().year
-        
-        if not (1900 <= int(grad_year) <= current_year):
-            messages.error(request, "Invalid graduation year. Please enter a year between 1900 and the current year.")
-            return redirect('nostalgia_app:home')
+    categories = Category.objects.all()
+    selected_category = request.GET.get('category')
 
-        # Fetch data from APIs
-        news_data = fetch_news_data(grad_year)
-        book_data = fetch_book_data(grad_year)
-        economic_data = fetch_economic_data(grad_year, current_year)
+    # Fetch approved user-submitted facts
+    user_facts = UserSubmittedFact.objects.filter(
+        status='approved',
+        year__gte=grad_year
+    )
 
-        # Fetch data from our database
-        categories = Category.objects.all()
-        significant_events = SignificantEvent.objects.filter(year=grad_year)
-        information_items = InformationItem.objects.filter(year=grad_year)
-        books = Book.objects.filter(year=grad_year)
+    # Fetch API results (placeholder for now)
+    api_facts = fetch_api_facts(grad_year)
 
-        context = {
-            'grad_year': grad_year,
-            'current_year': current_year,
-            'categories': categories,
-            'significant_events': significant_events,
-            'information_items': information_items,
-            'books': books,
-            'news_data': news_data,
-            'book_data': book_data,
-            'economic_data': economic_data,
-        }
+    # Combine and process facts
+    all_facts = process_facts(user_facts, api_facts)
 
-        return render(request, 'nostalgia_app/results.html', context)
+    # Filter by category if selected
+    if selected_category:
+        all_facts = [fact for fact in all_facts if selected_category in fact['categories']]
 
-    except Exception as e:
-        logger.error(f"Unexpected error in results view: {str(e)}")
-        messages.error(request, "An error occurred while processing your request. Please try again.")
-        return redirect('nostalgia_app:home')
-    
+    context = {
+        'grad_year': grad_year,
+        'categories': categories,
+        'selected_category': selected_category,
+        'facts': all_facts,
+    }
+    return render(request, 'nostalgia_app/results.html', context)
+
+def fetch_api_facts(grad_year):
+    # Placeholder for API calls
+    # You would implement actual API calls here
+    return []
+
+def process_facts(user_facts, api_facts):
+    processed_facts = []
+    for fact in user_facts:
+        processed_facts.append({
+            'year': fact.year,
+            'title': summarize_fact(fact.description),
+            'description': fact.description,
+            'categories': [cat.name for cat in fact.categories.all()],
+            'source_url': fact.source_url
+        })
+    # Process API facts similarly
+    # ...
+    return processed_facts
+
+def summarize_fact(description):
+    # Simple summarization - take the first sentence
+    return description.split('.')[0]
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def submit_fact(request):
@@ -93,14 +106,14 @@ def submit_fact(request):
             fact.save()
             form.save_m2m()  # Save many-to-many data (categories)
             messages.success(request, "Thank you for submitting a fact! It will be reviewed by our team.")
-            
+
             # Increment rate limit
             cache.set(rate_limit_key, rate_limit + 1, 3600)  # 3600 seconds = 1 hour
-            
+
             return redirect('nostalgia_app:home')
     else:
         form = FactSubmissionForm()
-    
+
     categories = Category.objects.all()
     return render(request, 'nostalgia_app/submit_fact.html', {'form': form, 'categories': categories})
 
@@ -126,7 +139,7 @@ def admin_dashboard(request):
         logger.error(f"Error in admin_dashboard view: {str(e)}")
         messages.error(request, "An error occurred while loading the dashboard.")
         return redirect('nostalgia_app:home')
-    
+
 @user_passes_test(is_admin)
 def review_fact(request, fact_id):
     """
@@ -149,7 +162,7 @@ def review_fact(request, fact_id):
                 messages.error(request, "An error occurred while updating the fact.")
     else:
         form = FactReviewForm(instance=fact)
-    
+
     return render(request, 'nostalgia_app/review_fact.html', {'form': form, 'fact': fact})
 
 @user_passes_test(lambda u: u.is_superuser)

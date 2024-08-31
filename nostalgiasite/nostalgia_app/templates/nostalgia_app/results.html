@@ -1,136 +1,85 @@
-{% extends 'base.html' %}
+{% extends 'nostalgia_app/base.html' %}
 
-{% block title %}Changes Since {{ grad_year }}{% endblock %}
+{% block title %}Knowledge Time Capsule: From {{ grad_year }} to 2024{% endblock %}
 
 {% block content %}
-<h2>Knowledge Time Capsule: From {{ grad_year }} to {{ current_year }}</h2>
+<h2>Knowledge Time Capsule: From {{ grad_year }} to 2024</h2>
 
 <div class="category-selection">
     <h3>Select a Category to Explore:</h3>
-    <ul>
+    <div class="category-buttons">
         {% for category in categories %}
-        <li><a href="{% url 'nostalgia_app:results' grad_year=grad_year %}?category={{ category.slug }}">{{ category.name }}</a></li>
+            <a href="?category={{ category.name }}" class="category-button {% if category.name == selected_category %}active{% endif %}">{{ category.name }}</a>
         {% endfor %}
-    </ul>
+    </div>
 </div>
 
-{% if selected_category %}
-<section class="changes">
-    <h3>{{ selected_category.name }} - Then and Now</h3>
+<div id="facts-container">
+    {% if facts %}
+        {% for fact in facts %}
+            <div class="fact-item">
+                <h4>{{ fact.year }} - {{ fact.title }}</h4>
+                <p>{{ fact.description }}</p>
+                <p>Categories: {{ fact.categories|join:", " }}</p>
+                <a href="{{ fact.source_url }}" target="_blank">Learn More</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No facts found for the selected category and time period.</p>
+    {% endif %}
+</div>
 
-    <div class="outdated-info">
-        <h4>Outdated or Changed Information</h4>
-        <ul>
-            {% for item in outdated_info %}
-            <li class="change-item outdated">
-                <h5>{{ item.title }}</h5>
-                <p><strong>In {{ grad_year }}:</strong> {{ item.old_description }}</p>
-                <p><strong>Current Status:</strong> {{ item.current_status }}</p>
-                <p><strong>What Changed:</strong> {{ item.change_description }}</p>
-            </li>
-            {% empty %}
-            <li>No information in this category has become outdated since {{ grad_year }}.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="still-relevant">
-        <h4>Information Still Relevant Today</h4>
-        <ul>
-            {% for item in relevant_info %}
-            <li class="change-item relevant">
-                <h5>{{ item.title }}</h5>
-                <p>{{ item.description }}</p>
-                <p><strong>Why It's Still Relevant:</strong> {{ item.relevance_explanation }}</p>
-            </li>
-            {% empty %}
-            <li>All information in this category has changed since {{ grad_year }}.</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="new-developments">
-        <h4>New Developments Since {{ grad_year }}</h4>
-        <ul>
-            {% for item in new_developments %}
-            <li class="change-item new">
-                <h5>{{ item.title }}</h5>
-                <p>{{ item.description }}</p>
-                <p><strong>Introduced in:</strong> {{ item.year_introduced }}</p>
-            </li>
-            {% empty %}
-            <li>No new major developments in this category since {{ grad_year }}.</li>
-            {% endfor %}
-        </ul>
-    </div>
-</section>
-{% else %}
-<p>Please select a category to see how information has changed since your graduation.</p>
-{% endif %}
-
-<section class="significant-events">
+<div class="significant-events">
     <h3>Significant Events Since {{ grad_year }}</h3>
-    <ul>
-        {% for event in significant_events %}
-        <li>
-            <h4>{{ event.year }} - {{ event.title }}</h4>
-            <p>{{ event.description }}</p>
-            <p><strong>Impact:</strong> {{ event.impact }}</p>
-        </li>
-        {% empty %}
-        <li>No significant events found since {{ grad_year }}.</li>
-        {% endfor %}
-    </ul>
-</section>
+    <!-- Implement significant events section here -->
+</div>
 
-<section class="recommendations">
+<div class="recommendations">
     <h3>Recommended Reading to Catch Up</h3>
-    <ul>
-        {% for book in recommended_books %}
-        <li>
-            <h4>"{{ book.title }}" by {{ book.author }} ({{ book.year }})</h4>
-            <p>{{ book.description }}</p>
-            <p><strong>Why It's Relevant:</strong> {{ book.relevance }}</p>
-        </li>
-        {% empty %}
-        <li>No book recommendations available for this time period and category.</li>
-        {% endfor %}
-    </ul>
-</section>
+    <!-- Implement recommendations section here -->
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .category-button {
+        padding: 10px 15px;
+        background-color: #000080;
+        color: #FFFF00;
+        text-decoration: none;
+        border: 2px solid #FFFF00;
+    }
+    .category-button.active {
+        background-color: #FFFF00;
+        color: #000080;
+    }
+    .fact-item {
+        background-color: #000080;
+        border: 2px solid #00FF00;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const categoryLinks = document.querySelectorAll('.category-selection a');
-    categoryLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const category = this.getAttribute('href').split('category=')[1];
-            fetchCategoryData(category);
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryButtons = document.querySelectorAll('.category-button');
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const category = this.getAttribute('href').split('=')[1];
+                window.location.href = `?category=${category}`;
+            });
         });
     });
-
-    function fetchCategoryData(category) {
-        fetch(`/api/changes/?category=${category}&grad_year={{ grad_year }}`)
-            .then(response => response.json())
-            .then(data => {
-                updateChangesSection(data);
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    function updateChangesSection(data) {
-        const changesSection = document.querySelector('.changes');
-        // Update the content of the changes section with the new data
-        // This should be implemented based on your actual data structure
-        changesSection.innerHTML = `
-            <h3>${data.category_name} - Then and Now</h3>
-            <!-- Populate with outdated info -->
-            <!-- Populate with still relevant info -->
-            <!-- Populate with new developments -->
-        `;
-    }
-});
 </script>
 {% endblock %}
