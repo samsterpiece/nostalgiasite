@@ -20,6 +20,9 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+LOGIN_REDIRECT_URL = 'nostalgia_app:home'
+LOGIN_URL = 'nostalgia_app:login'
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

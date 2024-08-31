@@ -1,61 +1,49 @@
 import logging
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.db.models import Q
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.views.decorators.http import require_GET
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Category, InformationItem, SignificantEvent, Book
-from .serializers import (
-    CategorySerializer,
-    InformationItemSerializer,
-    SignificantEventSerializer,
-    BookSerializer
-)
+from .serializers import CategorySerializer, InformationItemSerializer, SignificantEventSerializer, BookSerializer
+from .forms import CustomUserCreationForm
 
 logger = logging.getLogger(__name__)
 
-@require_GET
 def home(request):
     """
     Render the home page of the Nostalgia Site.
-
-    This view displays the initial page where users can input their graduation year.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: Rendered home.html template.
     """
-    try:
-        return render(request, 'home.html')
-    except Exception as e:
-        logger.error(f"Error rendering home page: {str(e)}")
-        return render(request, '500.html', status=500)
+    current_year = timezone.now().year
+    return render(request, 'nostalgia_app/home.html', {'current_year': current_year})
+
+def submit_year(request):
+    """
+    Handle the submission of graduation year and redirect to results.
+    """
+    if request.method == 'POST':
+        grad_year = request.POST.get('grad_year')
+        if grad_year:
+            return redirect('nostalgia_app:results', grad_year=grad_year)
+        else:
+            messages.error(request, "Please enter a valid graduation year.")
+    return redirect('nostalgia_app:home')
 
 def results(request, grad_year):
     """
     Display results based on the user's graduation year and selected category.
-
-    This view fetches and organizes information about changes, developments,
-    and events that have occurred since the user's graduation year. It also
-    provides book recommendations based on the selected category.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-        grad_year (int): The user's graduation year.
-
-    Returns:
-        HttpResponse: Rendered results.html template with context data.
     """
     try:
         current_year = timezone.now().year
         
-        if not (1900 <= grad_year <= current_year):
+        if not (1900 <= int(grad_year) <= current_year):
             messages.error(request, "Invalid graduation year. Please enter a year between 1900 and the current year.")
-            return redirect('home')
+            return redirect('nostalgia_app:home')
 
         selected_category_slug = request.GET.get('category')
         categories = Category.objects.all()
@@ -63,7 +51,7 @@ def results(request, grad_year):
         if not categories.exists():
             logger.warning("No categories found in the database.")
             messages.warning(request, "No categories are available at the moment. Please try again later.")
-            return redirect('home')
+            return redirect('nostalgia_app:home')
 
         selected_category = None
         outdated_info = []
@@ -81,7 +69,7 @@ def results(request, grad_year):
             except Category.DoesNotExist:
                 logger.warning(f"Attempted to access non-existent category: {selected_category_slug}")
                 messages.error(request, "The selected category does not exist.")
-                return redirect('home')
+                return redirect('nostalgia_app:home')
 
         significant_events = SignificantEvent.objects.filter(year__gt=grad_year).order_by('year')
         recommended_books = Book.objects.filter(year__gt=grad_year, category=selected_category) if selected_category else []
@@ -98,12 +86,12 @@ def results(request, grad_year):
             'recommended_books': recommended_books,
         }
 
-        return render(request, 'results.html', context)
+        return render(request, 'nostalgia_app/results.html', context)
 
     except ValidationError as ve:
         logger.error(f"Validation error in results view: {str(ve)}")
         messages.error(request, "An error occurred while processing your request. Please try again.")
-        return redirect('home')
+        return redirect('nostalgia_app:home')
     except Exception as e:
         logger.error(f"Unexpected error in results view: {str(e)}")
         return render(request, '500.html', status=500)
@@ -112,17 +100,6 @@ def results(request, grad_year):
 def api_changes(request):
     """
     API endpoint for fetching category-specific changes.
-
-    This view handles requests for dynamically loading category data.
-    It returns JSON data containing outdated information, relevant information,
-    and new developments for a specific category and graduation year.
-
-    Args:
-        request (HttpRequest): The HTTP request object containing 'grad_year'
-                               and 'category' as GET parameters.
-
-    Returns:
-        Response: JSON data with category information or an error message.
     """
     try:
         grad_year = request.GET.get('grad_year')
@@ -163,54 +140,44 @@ def api_changes(request):
         logger.error(f"Error in api_changes view: {str(e)}")
         return Response({'error': 'An unexpected error occurred'}, status=500)
 
-@require_GET
+def signup(request):
+    """
+    Handle user registration.
+    """
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Account created successfully!")
+            return redirect('nostalgia_app:home')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'nostalgia_app/signup.html', {'form': form})
+
+@login_required
+def profile(request):
+    """
+    Display user profile page.
+    """
+    return render(request, 'nostalgia_app/profile.html')
+
 def about(request):
     """
     Render the about page of the Nostalgia Site.
-
-    This view displays information about the purpose and functionality
-    of the Nostalgia Site.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: Rendered about.html template.
     """
-    try:
-        return render(request, 'about.html')
-    except Exception as e:
-        logger.error(f"Error rendering about page: {str(e)}")
-        return render(request, '500.html', status=500)
+    return render(request, 'nostalgia_app/about.html')
 
 def error_404(request, exception):
     """
     Handle 404 (Page Not Found) errors.
-
-    This view is called when a page is not found on the site.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-        exception (Exception): The exception that was raised.
-
-    Returns:
-        HttpResponse: Rendered 404.html template with a 404 status code.
     """
     logger.warning(f"404 error: {request.path}")
-    return render(request, '404.html', status=404)
-
+    return render(request, 'nostalgia_app/404.html', status=404)
 
 def error_500(request):
     """
     Handle 500 (Internal Server Error) errors.
-
-    This view is called when there's an internal server error.
-
-    Args:
-        request (HttpRequest): The HTTP request object.
-
-    Returns:
-        HttpResponse: Rendered 500.html template with a 500 status code.
     """
     logger.error(f"500 error occurred")
-    return render(request, '500.html', status=500)
+    return render(request, 'nostalgia_app/500.html', status=500)

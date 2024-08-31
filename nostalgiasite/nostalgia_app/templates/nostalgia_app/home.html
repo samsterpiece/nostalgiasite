@@ -1,17 +1,17 @@
-{% extends 'base.html' %}
+{% extends 'nostalgia_app/base.html' %}
 
 {% block title %}Welcome to Nostalgia Site{% endblock %}
 
 {% block content %}
 <section class="intro">
     <h2>Welcome to Nostalgia Site!</h2>
-    <p>Rediscover the world as it was when you graduated. Enter your graduation year below:</p>
+    <p>Discover how the world has changed since you graduated. Enter your graduation year below:</p>
 </section>
 
-<form method="post" action="{% url 'nostalgia_app:results' %}" class="graduation-form">
+<form method="post" action="{% url 'nostalgia_app:submit_year' %}" class="graduation-form">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Take a Trip Down Memory Lane!</button>
+    <input type="number" name="grad_year" min="1900" max="{{ current_year }}" required>
+    <button type="submit">Take Me Back in Time!</button>
 </form>
 
 <section class="features">
@@ -23,29 +23,4 @@
         <li>Compare your memories with historical data</li>
     </ul>
 </section>
-
-<section class="how-it-works">
-    <h3>How it works:</h3>
-    <ol>
-        <li>Enter your graduation year</li>
-        <li>View a timeline of events from that year</li>
-        <li>See how things have changed since then</li>
-        <li>Get recommendations based on your graduation year</li>
-    </ol>
-</section>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Add any home page specific JavaScript here
-    document.addEventListener('DOMContentLoaded', function () {
-        const submitButton = document.querySelector('button[type="submit"]');
-        submitButton.addEventListener('mouseover', function () {
-            this.textContent = "Let's Go Back in Time!";
-        });
-        submitButton.addEventListener('mouseout', function () {
-            this.textContent = "Take a Trip Down Memory Lane!";
-        });
-    });
-</script>
 {% endblock %}

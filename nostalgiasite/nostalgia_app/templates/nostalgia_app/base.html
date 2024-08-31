@@ -4,29 +4,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nostalgia Site - {% block title %}Home{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>{% block title %}Nostalgia Site{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'nostalgia_app/css/style.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'nostalgia_app/images/favicon.ico' %}">
     {% block extra_css %}{% endblock %}
-    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body x-data="nostalgiaApp" @mousemove="updateCursorPosition">
-    <div class="retro-cursor" :style="`left: ${cursorPosition.x}px; top: ${cursorPosition.y}px;`"></div>
-
-    <div class="under-construction">🚧 Under Construction 🚧</div>
+<body>
+    <div class="retro-cursor"></div>
 
     <header>
-        <h1 x-text="displayedTitle"></h1>
+        <h1>🕰️ Nostalgia Site 🕰️</h1>
         <nav>
             <ul>
-                <li><a href="{% url 'nostalgia_app:home' %}" @mouseenter="playHoverSound">Home</a></li>
-                <li><a href="{% url 'nostalgia_app:about' %}" @mouseenter="playHoverSound">About</a></li>
+                <li><a href="{% url 'nostalgia_app:home' %}">Home</a></li>
+                <li><a href="{% url 'nostalgia_app:about' %}">About</a></li>
                 {% if user.is_authenticated %}
-                <li><a href="{% url 'nostalgia_app:profile' %}" @mouseenter="playHoverSound">Profile</a></li>
-                <li><a href="{% url 'nostalgia_app:logout' %}" @mouseenter="playHoverSound">Logout</a></li>
+                <li><a href="{% url 'nostalgia_app:profile' %}">Profile</a></li>
+                <li><a href="{% url 'nostalgia_app:logout' %}">Logout</a></li>
                 {% else %}
-                <li><a href="{% url 'nostalgia_app:login' %}" @mouseenter="playHoverSound">Login</a></li>
-                <li><a href="{% url 'nostalgia_app:signup' %}" @mouseenter="playHoverSound">Sign Up</a></li>
+                <li><a href="{% url 'nostalgia_app:login' %}">Login</a></li>
+                <li><a href="{% url 'nostalgia_app:signup' %}">Sign Up</a></li>
                 {% endif %}
             </ul>
         </nav>
@@ -53,12 +50,16 @@
 
     <footer>
         <p>&copy; 2024 Nostalgia Site. All rights reserved.</p>
-        <div class="visitor-counter">You are visitor number: <span x-text="visitorCount"></span></div>
+        <div class="visitor-counter">You are visitor number: <span id="visitorCount"></span></div>
         <div class="best-viewed">Best viewed in Netscape Navigator 4.0 or higher</div>
-        <a href="#"><img src="{% static 'images/geocities.gif' %}" alt="Hosted by GeoCities" /></a>
+        <a href="#"><img src="{% static 'nostalgia_app/images/geocities.gif' %}" alt="Hosted by GeoCities" /></a>
     </footer>
 
-    <script src="{% static 'js/main.js' %}"></script>
+    <div class="under-construction">🚧 Under Construction 🚧</div>
+
+    <button class="back-to-top" title="Back to Top">↑</button>
+
+    <script src="{% static 'nostalgia_app/js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
