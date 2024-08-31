@@ -5,34 +5,48 @@
 {% block content %}
 <div class="admin-dashboard">
     <h2>Admin Dashboard</h2>
-    <h3>Pending Facts for Approval</h3>
 
-    {% if pending_facts %}
-    <table class="pending-facts-table">
-        <thead>
-            <tr>
-                <th>Year</th>
-                <th>Title</th>
-                <th>Submitted By</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for fact in pending_facts %}
-            <tr>
-                <td>{{ fact.year }}</td>
-                <td>{{ fact.title }}</td>
-                <td>{{ fact.user.username }}</td>
-                <td>
-                    <a href="{% url 'nostalgia_app:approve_fact' fact.id %}" class="approve-button">Approve</a>
-                    <a href="{% url 'nostalgia_app:reject_fact' fact.id %}" class="reject-button">Reject</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p class="no-facts">No pending facts to review.</p>
-    {% endif %}
+    <div class="tab-container">
+        <button class="tab-button active" onclick="openTab(event, 'UnderReview')">Under Review</button>
+        <button class="tab-button" onclick="openTab(event, 'Approved')">Approved</button>
+        <button class="tab-button" onclick="openTab(event, 'Denied')">Denied</button>
+        <button class="tab-button" onclick="openTab(event, 'Undetermined')">Undetermined</button>
+    </div>
+
+    <div id="UnderReview" class="tab-content">
+        <h3>Facts Under Review</h3>
+        {% include 'nostalgia_app/fact_list.html' with facts=under_review %}
+    </div>
+
+    <div id="Approved" class="tab-content" style="display:none;">
+        <h3>Approved Facts</h3>
+        {% include 'nostalgia_app/fact_list.html' with facts=approved %}
+    </div>
+
+    <div id="Denied" class="tab-content" style="display:none;">
+        <h3>Denied Facts</h3>
+        {% include 'nostalgia_app/fact_list.html' with facts=denied %}
+    </div>
+
+    <div id="Undetermined" class="tab-content" style="display:none;">
+        <h3>Undetermined Facts</h3>
+        {% include 'nostalgia_app/fact_list.html' with facts=undetermined %}
+    </div>
 </div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tabbuttons;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tabbuttons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabbuttons.length; i++) {
+            tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
 {% endblock %}

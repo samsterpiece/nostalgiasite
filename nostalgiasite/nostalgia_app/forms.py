@@ -18,14 +18,38 @@ class CustomUserCreationForm(UserCreationForm):
         return user
 
 class FactSubmissionForm(forms.ModelForm):
-    categories = forms.ModelMultipleChoiceField(
-        queryset=Category.objects.all(),
-        widget=forms.CheckboxSelectMultiple
+    notification_preference = forms.ChoiceField(
+        choices=[('email', 'Email'), ('phone', 'Phone')],
+        widget=forms.RadioSelect,
+        required=True
     )
-
+    
     class Meta:
         model = UserSubmittedFact
-        fields = ['year', 'title', 'description', 'categories', 'source_url']
+        fields = ['year', 'title', 'description', 'categories', 'source_url', 'notification_email', 'notification_phone']
         widgets = {
-            'year': forms.NumberInput(attrs={'min': 1900, 'max': 2024}),
+            'categories': forms.CheckboxSelectMultiple(),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        notification_preference = cleaned_data.get('notification_preference')
+        email = cleaned_data.get('notification_email')
+        phone = cleaned_data.get('notification_phone')
+
+        if notification_preference == 'email' and not email:
+            raise forms.ValidationError("Please provide an email for notifications.")
+        elif notification_preference == 'phone' and not phone:
+            raise forms.ValidationError("Please provide a phone number for notifications.")
+
+        return cleaned_data
+    
+
+
+class FactReviewForm(forms.ModelForm):
+    class Meta:
+        model = UserSubmittedFact
+        fields = ['status', 'review_notes']
+        widgets = {
+            'review_notes': forms.Textarea(attrs={'rows': 4}),
         }

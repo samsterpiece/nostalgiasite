@@ -34,11 +34,19 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(UserSubmittedFact)
 class UserSubmittedFactAdmin(admin.ModelAdmin):
-    list_display = ('title', 'year', 'user', 'is_approved')
-    list_filter = ('is_approved', 'year')
+    list_display = ('title', 'year', 'user', 'status', 'submitted_at')
+    list_filter = ('status', 'year', 'categories')
     search_fields = ('title', 'description', 'user__username')
-    actions = ['approve_facts']
+    actions = ['approve_facts', 'deny_facts', 'mark_as_under_review']
 
     def approve_facts(self, request, queryset):
-        queryset.update(is_approved=True)
-    approve_facts.short_description = "Approve selected facts"
+        queryset.update(status='approved')
+    approve_facts.short_description = "Mark selected facts as approved"
+
+    def deny_facts(self, request, queryset):
+        queryset.update(status='denied')
+    deny_facts.short_description = "Mark selected facts as denied"
+
+    def mark_as_under_review(self, request, queryset):
+        queryset.update(status='under_review')
+    mark_as_under_review.short_description = "Mark selected facts as under review"

@@ -1,5 +1,7 @@
-from django.urls import path
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.contrib import admin
+from django.urls import path, include
 from . import views
 
 app_name = 'nostalgia_app'
@@ -17,4 +19,5 @@ urlpatterns = [
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('approve-fact/<int:fact_id>/', views.approve_fact, name='approve_fact'),
     path('reject-fact/<int:fact_id>/', views.reject_fact, name='reject_fact'),
+    path('review-fact/<int:fact_id>/', views.review_fact, name='review_fact'),
 ]

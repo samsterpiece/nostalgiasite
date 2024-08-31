@@ -10,6 +10,7 @@
     <form method="post" class="fact-form">
         {% csrf_token %}
         {% for field in form %}
+        {% if field.name != 'categories' %}
         <div class="form-group">
             {{ field.label_tag }}
             {{ field }}
@@ -20,6 +21,22 @@
             <div class="error">{{ error }}</div>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="form-group">
+            <label>Categories (select at least one):</label>
+            <div class="category-options">
+                {% for category in form.categories.field.queryset %}
+                <label class="category-checkbox">
+                    <input type="checkbox" name="categories" value="{{ category.id }}" {% if category.id in form.categories.value %}checked{% endif %}>
+                    {{ category.name }}
+                </label>
+                {% endfor %}
+            </div>
+            {% for error in field.errors %}
+            <div class="error">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endfor %}
         <button type="submit" class="submit-button">Submit Fact</button>
     </form>

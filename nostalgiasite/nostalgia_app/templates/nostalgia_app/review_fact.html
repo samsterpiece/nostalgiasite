@@ -1,0 +1,28 @@
+{% extends 'nostalgia_app/base.html' %}
+
+{% block title %}Review Fact - Nostalgia Site{% endblock %}
+
+{% block content %}
+<div class="review-fact-container">
+    <h2>Review Fact</h2>
+    <div class="fact-details">
+        <h3>{{ fact.title }}</h3>
+        <p><strong>Year:</strong> {{ fact.year }}</p>
+        <p><strong>Submitted by:</strong> {{ fact.user.username }}</p>
+        <p><strong>Description:</strong> {{ fact.description }}</p>
+        <p>
+            <strong>Categories:</strong>
+            {% for category in fact.categories.all %}
+            {{ category.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        <p><strong>Source URL:</strong> <a href="{{ fact.source_url }}" target="_blank">{{ fact.source_url }}</a></p>
+    </div>
+
+    <form method="post" class="review-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="submit-button">Update Status</button>
+    </form>
+</div>
+{% endblock %}

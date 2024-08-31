@@ -14,8 +14,12 @@ from .forms import CustomUserCreationForm, FactSubmissionForm
 from django.core.cache import cache
 from django.views.decorators.http import require_http_methods
 import requests
+from .forms import FactReviewForm
 
 logger = logging.getLogger(__name__)
+
+def is_admin(user):
+    return user.is_authenticated and user.is_superuser
 
 def home(request):
     current_year = timezone.now().year
@@ -67,7 +71,7 @@ def results(request, grad_year):
         logger.error(f"Unexpected error in results view: {str(e)}")
         messages.error(request, "An error occurred while processing your request. Please try again.")
         return redirect('nostalgia_app:home')
-
+    
 @login_required
 @require_http_methods(["GET", "POST"])
 def submit_fact(request):
@@ -86,7 +90,7 @@ def submit_fact(request):
             fact = form.save(commit=False)
             fact.user = request.user
             fact.save()
-            form.save_m2m()  # Save many-to-many data
+            form.save_m2m()  # Save many-to-many data (categories)
             messages.success(request, "Thank you for submitting a fact! It will be reviewed by our team.")
             
             # Increment rate limit
@@ -95,12 +99,57 @@ def submit_fact(request):
             return redirect('nostalgia_app:home')
     else:
         form = FactSubmissionForm()
-    return render(request, 'nostalgia_app/submit_fact.html', {'form': form})
+    
+    categories = Category.objects.all()
+    return render(request, 'nostalgia_app/submit_fact.html', {'form': form, 'categories': categories})
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(is_admin)
 def admin_dashboard(request):
-    pending_facts = UserSubmittedFact.objects.filter(is_approved=False)
-    return render(request, 'nostalgia_app/admin_dashboard.html', {'pending_facts': pending_facts})
+    """
+    Renders the admin dashboard with tabs for different fact statuses.
+    """
+    try:
+        under_review = UserSubmittedFact.objects.filter(status='under_review')
+        approved = UserSubmittedFact.objects.filter(status='approved')
+        denied = UserSubmittedFact.objects.filter(status='denied')
+        undetermined = UserSubmittedFact.objects.filter(status='undetermined')
+
+        context = {
+            'under_review': under_review,
+            'approved': approved,
+            'denied': denied,
+            'undetermined': undetermined,
+        }
+        return render(request, 'nostalgia_app/admin_dashboard.html', context)
+    except Exception as e:
+        logger.error(f"Error in admin_dashboard view: {str(e)}")
+        messages.error(request, "An error occurred while loading the dashboard.")
+        return redirect('nostalgia_app:home')
+    
+@user_passes_test(is_admin)
+def review_fact(request, fact_id):
+    """
+    Allows admins to review and update the status of a submitted fact.
+    """
+    fact = get_object_or_404(UserSubmittedFact, id=fact_id)
+    if request.method == 'POST':
+        form = FactReviewForm(request.POST, instance=fact)
+        if form.is_valid():
+            try:
+                fact = form.save(commit=False)
+                fact.reviewed_by = request.user
+                fact.reviewed_at = timezone.now()
+                fact.save()
+                messages.success(request, f"Fact '{fact.title}' has been updated.")
+                # Here you would add logic to send notification to the user
+                return redirect('nostalgia_app:admin_dashboard')
+            except Exception as e:
+                logger.error(f"Error updating fact: {str(e)}")
+                messages.error(request, "An error occurred while updating the fact.")
+    else:
+        form = FactReviewForm(instance=fact)
+    
+    return render(request, 'nostalgia_app/review_fact.html', {'form': form, 'fact': fact})
 
 @user_passes_test(lambda u: u.is_superuser)
 def approve_fact(request, fact_id):

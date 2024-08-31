@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 from datetime import datetime
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -59,14 +61,40 @@ class Book(models.Model):
         return f"{self.title} by {self.author}"
 
 class UserSubmittedFact(models.Model):
+    STATUS_CHOICES = [
+        ('under_review', 'Under Review'),
+        ('approved', 'Approved'),
+        ('denied', 'Denied'),
+        ('undetermined', 'Undetermined'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     year = models.IntegerField()
     title = models.CharField(max_length=200)
     description = models.TextField()
     categories = models.ManyToManyField(Category)
     source_url = models.URLField()
-    is_approved = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='under_review')
     submitted_at = models.DateTimeField(auto_now_add=True)
+    review_notes = models.TextField(blank=True)
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='reviewed_facts')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    notification_email = models.EmailField(blank=True, null=True)
+    notification_phone = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
         return f"{self.year} - {self.title} (Submitted by {self.user.username})"
+    
+    def clean(self):
+        if self.year < 1900 or self.year > timezone.now().year:
+            raise ValidationError("Year must be between 1900 and the current year.")
+        if not self.notification_email and not self.notification_phone:
+            raise ValidationError("Please provide either an email or phone number for notifications.")
+
+        # Allow reviewed_by to be blank during initial submission
+        if self.pk is None:
+            self._meta.get_field('reviewed_by').blank = True
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

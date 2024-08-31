@@ -10,8 +10,6 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <div class="retro-cursor"></div>
-
     <header>
         <h1>🕰️ Nostalgia Site 🕰️</h1>
         <nav>
@@ -33,9 +31,11 @@
         </nav>
     </header>
 
+    {% if request.path == '/' %}
     <div class="marquee">
         <span>Welcome to Nostalgia Site! Relive the glory days of the early internet!</span>
     </div>
+    {% endif %}
 
     <main>
         {% if messages %}
@@ -54,14 +54,9 @@
 
     <footer>
         <p>&copy; 2024 Nostalgia Site. All rights reserved.</p>
-        <div class="visitor-counter">You are visitor number: <span id="visitorCount"></span></div>
-        <div class="best-viewed">Best viewed in Netscape Navigator 4.0 or higher</div>
-        <a href="#"><img src="{% static 'nostalgia_app/images/geocities.gif' %}" alt="Hosted by Aveta" /></a>
     </footer>
 
     <div class="under-construction">🚧 Under Construction 🚧</div>
-
-    <button class="back-to-top" title="Back to Top">↑</button>
 
     <script src="{% static 'nostalgia_app/js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}

@@ -1,0 +1,28 @@
+{% if facts %}
+<table class="fact-table">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Title</th>
+            <th>Submitted By</th>
+            <th>Submitted At</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for fact in facts %}
+        <tr>
+            <td>{{ fact.year }}</td>
+            <td>{{ fact.title }}</td>
+            <td>{{ fact.user.username }}</td>
+            <td>{{ fact.submitted_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a href="{% url 'nostalgia_app:review_fact' fact.id %}" class="review-button">Review</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No facts to display.</p>
+{% endif %}

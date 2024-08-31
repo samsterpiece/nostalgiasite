@@ -1,4 +1,4 @@
-/* General Styles */
+﻿/* General Styles */
 body {
     font-family: "Comic Sans MS", cursive, sans-serif;
     background: #000000 url('/static/nostalgia_app/images/stars.gif');
@@ -51,7 +51,7 @@ form {
     margin: 20px 0;
 }
 
-input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select {
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="url"], textarea, select {
     background-color: #000000;
     border: 2px solid #00FF00;
     color: #00FF00;
@@ -184,12 +184,41 @@ footer {
     display: block;
 }
 
-.fact-form select {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300FF00'%3E%3Cpath d='M0 0h12L6 12z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
+.category-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
 }
+
+.category-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+    .category-checkbox input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #00FF00;
+        background-color: #000000;
+        margin-right: 5px;
+        position: relative;
+        cursor: pointer;
+    }
+
+        .category-checkbox input[type="checkbox"]:checked::before {
+            content: '✓';
+            position: absolute;
+            color: #00FF00;
+            font-size: 16px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
 
 .error {
     color: #FF0000;
@@ -253,3 +282,30 @@ footer {
     font-style: italic;
     margin-top: 20px;
 }
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    header {
+        padding: 10px;
+    }
+
+    nav ul li {
+        display: block;
+        margin: 10px 0;
+    }
+
+    .submit-fact-container {
+        padding: 10px;
+    }
+
+    .category-options {
+        flex-direction: column;
+    }
+}
+/* Admin Dashboard Styles */
+.admin-dashboard {
+    background-color: #000
