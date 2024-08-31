@@ -11,8 +11,7 @@ class CustomMigrationWriter(MigrationWriter):
             fh.write(self.render(migrations))
 
     def migration_name(self, migrations):
-        # Generate a descriptive name based on the migrations
-        # For example, you can use the first migration operation's description
+        # Generates a descriptive name based on the migrations
         if migrations:
             operation = migrations[0]['operations'][0]
             description = operation.describe()

@@ -1,0 +1,27 @@
+{% extends 'nostalgia_app/base.html' %}
+
+{% block title %}Submit a Fact - Nostalgia Site{% endblock %}
+
+{% block content %}
+<div class="submit-fact-container">
+    <h2>Submit a New Fact</h2>
+    <p>Help us expand our knowledge base by submitting a fact about a specific year. Our team will review your submission before it's added to the site.</p>
+
+    <form method="post" class="fact-form">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+            <div class="error">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="submit-button">Submit Fact</button>
+    </form>
+</div>
+{% endblock %}

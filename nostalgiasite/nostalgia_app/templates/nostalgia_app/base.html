@@ -20,7 +20,11 @@
                 <li><a href="{% url 'nostalgia_app:about' %}">About</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'nostalgia_app:profile' %}">Profile</a></li>
+                <li><a href="{% url 'nostalgia_app:submit_fact' %}">Submit Fact</a></li>
                 <li><a href="{% url 'nostalgia_app:logout' %}">Logout</a></li>
+                {% if user.is_superuser %}
+                <li><a href="{% url 'nostalgia_app:admin_dashboard' %}">Admin Dashboard</a></li>
+                {% endif %}
                 {% else %}
                 <li><a href="{% url 'nostalgia_app:login' %}">Login</a></li>
                 <li><a href="{% url 'nostalgia_app:signup' %}">Sign Up</a></li>
@@ -52,7 +56,7 @@
         <p>&copy; 2024 Nostalgia Site. All rights reserved.</p>
         <div class="visitor-counter">You are visitor number: <span id="visitorCount"></span></div>
         <div class="best-viewed">Best viewed in Netscape Navigator 4.0 or higher</div>
-        <a href="#"><img src="{% static 'nostalgia_app/images/geocities.gif' %}" alt="Hosted by GeoCities" /></a>
+        <a href="#"><img src="{% static 'nostalgia_app/images/geocities.gif' %}" alt="Hosted by Aveta" /></a>
     </footer>
 
     <div class="under-construction">🚧 Under Construction 🚧</div>

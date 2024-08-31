@@ -1,7 +1,7 @@
-/* style.css */
+/* General Styles */
 body {
     font-family: "Comic Sans MS", cursive, sans-serif;
-    background: #000000 url('/static/images/stars.gif');
+    background: #000000 url('/static/nostalgia_app/images/stars.gif');
     color: #00FF00;
     max-width: 800px;
     margin: 0 auto;
@@ -51,15 +51,17 @@ form {
     margin: 20px 0;
 }
 
-input[type="text"], input[type="number"] {
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], textarea, select {
     background-color: #000000;
     border: 2px solid #00FF00;
     color: #00FF00;
     padding: 5px;
     font-family: "Courier New", monospace;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
-button {
+button, .submit-button {
     background-color: #FF00FF;
     color: #FFFFFF;
     border: none;
@@ -69,86 +71,34 @@ button {
     font-size: 16px;
 }
 
-    button:hover {
+    button:hover, .submit-button:hover {
         background-color: #00FFFF;
         color: #000000;
     }
 
-/* Timeline Styles */
-#timeline-container {
-    margin-top: 40px;
-}
-
-.timeline-event {
+/* Marquee Effect */
+.marquee {
     background-color: #000080;
-    border: 2px solid #00FF00;
-    margin: 20px 0;
-    padding: 10px;
-    text-align: left;
-    position: relative;
-}
-
-.timeline-date {
-    position: absolute;
-    top: -15px;
-    left: 10px;
-    background-color: #FF00FF;
     color: #FFFFFF;
-    padding: 5px 10px;
-    font-weight: bold;
+    padding: 5px 0;
+    overflow: hidden;
 }
 
-.timeline-content h3 {
-    margin-top: 15px;
-}
-
-.outdated {
-    border-color: #FF0000;
-}
-
-.outdated-note {
-    color: #FF0000;
-    font-weight: bold;
-}
-
-/* Recommendations Styles */
-.recommendations {
-    background-color: #000080;
-    border: 3px dashed #FFFF00;
-    padding: 20px;
-    margin-top: 40px;
-}
-
-    .recommendations ul {
-        list-style-type: none;
-        padding: 0;
+    .marquee span {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee 15s linear infinite;
     }
 
-    .recommendations li {
-        margin-bottom: 20px;
+@keyframes marquee {
+    0% {
+        transform: translate(0, 0);
     }
 
-/* Fun Facts Styles */
-.fun-facts {
-    background-color: #000080;
-    border: 3px solid #00FF00;
-    padding: 20px;
-    margin-top: 40px;
+    100% {
+        transform: translate(-100%, 0);
+    }
 }
-
-    .fun-facts ul {
-        list-style-type: none;
-        padding: 0;
-    }
-
-/* Share Results Styles */
-.share-results {
-    margin-top: 40px;
-}
-
-    .share-results button {
-        margin: 0 10px;
-    }
 
 /* Message Styles */
 .messages {
@@ -170,48 +120,136 @@ footer {
     padding-top: 20px;
 }
 
-/* Responsive Design */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-
-    header {
-        padding: 10px;
-    }
-
-    nav ul li {
-        display: block;
-        margin: 10px 0;
-    }
-
-    .timeline-event {
-        padding: 15px 10px 10px;
-    }
-
-    .timeline-date {
-        position: static;
-        display: block;
-        width: fit-content;
-        margin-bottom: 10px;
-    }
+/* Under Construction */
+.under-construction {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #FFFF00;
+    color: #000000;
+    padding: 5px;
+    font-weight: bold;
+    transform: rotate(15deg);
 }
 
-/* Animation for blinking text */
-@keyframes blink {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
+/* Back to Top Button */
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #FF00FF;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
 }
 
-.blink {
-    animation: blink 1s linear infinite;
+/* Retro Cursor */
+.retro-cursor {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #00FF00;
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Submit Fact Page Styles */
+.submit-fact-container {
+    background-color: #000080;
+    border: 3px dashed #FFFF00;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    color: #00FF00;
+}
+
+.fact-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.fact-form label {
+    color: #FFFF00;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.fact-form select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300FF00'%3E%3Cpath d='M0 0h12L6 12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.error {
+    color: #FF0000;
+    margin-top: 5px;
+}
+
+/* Admin Dashboard Styles */
+.admin-dashboard {
+    background-color: #000080;
+    border: 3px dashed #FFFF00;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+    color: #00FF00;
+}
+
+.pending-facts-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+    .pending-facts-table th, .pending-facts-table td {
+        border: 2px solid #00FF00;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .pending-facts-table th {
+        background-color: #000000;
+        color: #FFFF00;
+    }
+
+    .pending-facts-table tr:nth-child(even) {
+        background-color: #000040;
+    }
+
+.approve-button, .reject-button {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 2px;
+    text-decoration: none;
+    color: #FFFFFF;
+    font-weight: bold;
+}
+
+.approve-button {
+    background-color: #00FF00;
+}
+
+.reject-button {
+    background-color: #FF0000;
+}
+
+    .approve-button:hover, .reject-button:hover {
+        opacity: 0.8;
+    }
+
+.no-facts {
+    text-align: center;
+    font-style: italic;
+    margin-top: 20px;
 }

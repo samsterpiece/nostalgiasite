@@ -1,31 +1,27 @@
 import logging
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Category, InformationItem, SignificantEvent, Book
+from .models import Category, InformationItem, SignificantEvent, Book, UserSubmittedFact
 from .serializers import CategorySerializer, InformationItemSerializer, SignificantEventSerializer, BookSerializer
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, FactSubmissionForm
+from django.core.cache import cache
+from django.views.decorators.http import require_http_methods
+import requests
 
 logger = logging.getLogger(__name__)
 
 def home(request):
-    """
-    Render the home page of the Nostalgia Site.
-    """
     current_year = timezone.now().year
     return render(request, 'nostalgia_app/home.html', {'current_year': current_year})
 
 def submit_year(request):
-    """
-    Handle the submission of graduation year and redirect to results.
-    """
     if request.method == 'POST':
         grad_year = request.POST.get('grad_year')
         if grad_year:
@@ -35,9 +31,6 @@ def submit_year(request):
     return redirect('nostalgia_app:home')
 
 def results(request, grad_year):
-    """
-    Display results based on the user's graduation year and selected category.
-    """
     try:
         current_year = timezone.now().year
         
@@ -45,105 +38,101 @@ def results(request, grad_year):
             messages.error(request, "Invalid graduation year. Please enter a year between 1900 and the current year.")
             return redirect('nostalgia_app:home')
 
-        selected_category_slug = request.GET.get('category')
+        # Fetch data from APIs
+        news_data = fetch_news_data(grad_year)
+        book_data = fetch_book_data(grad_year)
+        economic_data = fetch_economic_data(grad_year, current_year)
+
+        # Fetch data from our database
         categories = Category.objects.all()
-        
-        if not categories.exists():
-            logger.warning("No categories found in the database.")
-            messages.warning(request, "No categories are available at the moment. Please try again later.")
-            return redirect('nostalgia_app:home')
-
-        selected_category = None
-        outdated_info = []
-        relevant_info = []
-        new_developments = []
-
-        if selected_category_slug:
-            try:
-                selected_category = categories.get(slug=selected_category_slug)
-                all_items = InformationItem.objects.filter(category=selected_category)
-                
-                outdated_info = all_items.filter(is_outdated=True, year__lte=grad_year)
-                relevant_info = all_items.filter(is_outdated=False, year__lte=grad_year)
-                new_developments = all_items.filter(year__gt=grad_year)
-            except Category.DoesNotExist:
-                logger.warning(f"Attempted to access non-existent category: {selected_category_slug}")
-                messages.error(request, "The selected category does not exist.")
-                return redirect('nostalgia_app:home')
-
-        significant_events = SignificantEvent.objects.filter(year__gt=grad_year).order_by('year')
-        recommended_books = Book.objects.filter(year__gt=grad_year, category=selected_category) if selected_category else []
+        significant_events = SignificantEvent.objects.filter(year=grad_year)
+        information_items = InformationItem.objects.filter(year=grad_year)
+        books = Book.objects.filter(year=grad_year)
 
         context = {
             'grad_year': grad_year,
             'current_year': current_year,
             'categories': categories,
-            'selected_category': selected_category,
-            'outdated_info': outdated_info,
-            'relevant_info': relevant_info,
-            'new_developments': new_developments,
             'significant_events': significant_events,
-            'recommended_books': recommended_books,
+            'information_items': information_items,
+            'books': books,
+            'news_data': news_data,
+            'book_data': book_data,
+            'economic_data': economic_data,
         }
 
         return render(request, 'nostalgia_app/results.html', context)
 
-    except ValidationError as ve:
-        logger.error(f"Validation error in results view: {str(ve)}")
-        messages.error(request, "An error occurred while processing your request. Please try again.")
-        return redirect('nostalgia_app:home')
     except Exception as e:
         logger.error(f"Unexpected error in results view: {str(e)}")
-        return render(request, '500.html', status=500)
+        messages.error(request, "An error occurred while processing your request. Please try again.")
+        return redirect('nostalgia_app:home')
 
-@api_view(['GET'])
-def api_changes(request):
-    """
-    API endpoint for fetching category-specific changes.
-    """
-    try:
-        grad_year = request.GET.get('grad_year')
-        category_slug = request.GET.get('category')
+@login_required
+@require_http_methods(["GET", "POST"])
+def submit_fact(request):
+    if request.method == 'POST':
+        # Check rate limit
+        user_id = request.user.id
+        rate_limit_key = f'fact_submission_rate_limit_{user_id}'
+        rate_limit = cache.get(rate_limit_key, 0)
 
-        if not grad_year or not category_slug:
-            return Response({'error': 'Missing required parameters'}, status=400)
+        if rate_limit >= 5:  # Limit to 5 submissions per hour
+            messages.error(request, "You've reached the maximum number of submissions per hour. Please try again later.")
+            return redirect('nostalgia_app:home')
 
-        try:
-            grad_year = int(grad_year)
-            current_year = timezone.now().year
-            if not (1900 <= grad_year <= current_year):
-                return Response({'error': 'Invalid graduation year'}, status=400)
-        except ValueError:
-            return Response({'error': 'Invalid graduation year format'}, status=400)
+        form = FactSubmissionForm(request.POST)
+        if form.is_valid():
+            fact = form.save(commit=False)
+            fact.user = request.user
+            fact.save()
+            form.save_m2m()  # Save many-to-many data
+            messages.success(request, "Thank you for submitting a fact! It will be reviewed by our team.")
+            
+            # Increment rate limit
+            cache.set(rate_limit_key, rate_limit + 1, 3600)  # 3600 seconds = 1 hour
+            
+            return redirect('nostalgia_app:home')
+    else:
+        form = FactSubmissionForm()
+    return render(request, 'nostalgia_app/submit_fact.html', {'form': form})
 
-        try:
-            category = Category.objects.get(slug=category_slug)
-        except Category.DoesNotExist:
-            return Response({'error': 'Category not found'}, status=404)
+@user_passes_test(lambda u: u.is_superuser)
+def admin_dashboard(request):
+    pending_facts = UserSubmittedFact.objects.filter(is_approved=False)
+    return render(request, 'nostalgia_app/admin_dashboard.html', {'pending_facts': pending_facts})
 
-        all_items = InformationItem.objects.filter(category=category)
-        
-        outdated_info = all_items.filter(is_outdated=True, year__lte=grad_year)
-        relevant_info = all_items.filter(is_outdated=False, year__lte=grad_year)
-        new_developments = all_items.filter(year__gt=grad_year)
+@user_passes_test(lambda u: u.is_superuser)
+def approve_fact(request, fact_id):
+    fact = get_object_or_404(UserSubmittedFact, id=fact_id)
+    fact.is_approved = True
+    fact.save()
+    messages.success(request, f"Fact '{fact.title}' has been approved.")
+    return redirect('nostalgia_app:admin_dashboard')
 
-        data = {
-            'category': CategorySerializer(category).data,
-            'outdated_info': InformationItemSerializer(outdated_info, many=True).data,
-            'relevant_info': InformationItemSerializer(relevant_info, many=True).data,
-            'new_developments': InformationItemSerializer(new_developments, many=True).data,
-        }
+@user_passes_test(lambda u: u.is_superuser)
+def reject_fact(request, fact_id):
+    fact = get_object_or_404(UserSubmittedFact, id=fact_id)
+    fact.delete()
+    messages.success(request, f"Fact '{fact.title}' has been rejected and deleted.")
+    return redirect('nostalgia_app:admin_dashboard')
 
-        return Response(data)
+def fetch_news_data(year):
+    # Implement API call to News API
+    # Return formatted news data
+    pass
 
-    except Exception as e:
-        logger.error(f"Error in api_changes view: {str(e)}")
-        return Response({'error': 'An unexpected error occurred'}, status=500)
+def fetch_book_data(year):
+    # Implement API call to Open Library API
+    # Return formatted book data
+    pass
+
+def fetch_economic_data(start_year, end_year):
+    # Implement API call to World Bank API
+    # Return formatted economic data
+    pass
 
 def signup(request):
-    """
-    Handle user registration.
-    """
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -157,27 +146,15 @@ def signup(request):
 
 @login_required
 def profile(request):
-    """
-    Display user profile page.
-    """
     return render(request, 'nostalgia_app/profile.html')
 
 def about(request):
-    """
-    Render the about page of the Nostalgia Site.
-    """
     return render(request, 'nostalgia_app/about.html')
 
 def error_404(request, exception):
-    """
-    Handle 404 (Page Not Found) errors.
-    """
     logger.warning(f"404 error: {request.path}")
     return render(request, 'nostalgia_app/404.html', status=404)
 
 def error_500(request):
-    """
-    Handle 500 (Internal Server Error) errors.
-    """
     logger.error(f"500 error occurred")
     return render(request, 'nostalgia_app/500.html', status=500)

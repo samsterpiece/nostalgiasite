@@ -1,0 +1,38 @@
+{% extends 'nostalgia_app/base.html' %}
+
+{% block title %}Admin Dashboard - Nostalgia Site{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <h2>Admin Dashboard</h2>
+    <h3>Pending Facts for Approval</h3>
+
+    {% if pending_facts %}
+    <table class="pending-facts-table">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Title</th>
+                <th>Submitted By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fact in pending_facts %}
+            <tr>
+                <td>{{ fact.year }}</td>
+                <td>{{ fact.title }}</td>
+                <td>{{ fact.user.username }}</td>
+                <td>
+                    <a href="{% url 'nostalgia_app:approve_fact' fact.id %}" class="approve-button">Approve</a>
+                    <a href="{% url 'nostalgia_app:reject_fact' fact.id %}" class="reject-button">Reject</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-facts">No pending facts to review.</p>
+    {% endif %}
+</div>
+{% endblock %}

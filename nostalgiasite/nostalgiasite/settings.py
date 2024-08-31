@@ -36,6 +36,12 @@ INSTALLED_APPS = [
 ]
 HANDLER500 = 'nostalgia_app.views.error_500'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
