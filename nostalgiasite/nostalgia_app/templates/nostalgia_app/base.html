@@ -18,6 +18,9 @@
             <ul>
                 <li><a href="{% url 'nostalgia_app:home' %}">Home</a></li>
                 <li><a href="{% url 'nostalgia_app:about' %}">About</a></li>
+                <li id="results-tab" style="display: none;">
+                    <a href="#" id="results-link">Results</a>
+                </li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'nostalgia_app:profile' %}">Profile</a></li>
                     <li><a href="{% url 'nostalgia_app:submit_fact' %}">Submit Fact</a></li>
@@ -60,5 +63,16 @@
 
     <script src="{% static 'nostalgia_app/js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
+    <script>
+        // Check if there's a stored grad_year in localStorage
+        const storedGradYear = localStorage.getItem('lastSearchedYear');
+        const resultsTab = document.getElementById('results-tab');
+        const resultsLink = document.getElementById('results-link');
+
+        if (storedGradYear) {
+            resultsTab.style.display = 'inline-block';
+            resultsLink.href = "{% url 'nostalgia_app:results' grad_year=0 %}".replace('0', storedGradYear);
+        }
+    </script>
 </body>
 </html>

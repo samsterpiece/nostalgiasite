@@ -8,12 +8,12 @@
     <p>Discover how the world has changed since you graduated. Select your graduation year below:</p>
 </section>
 
-<form method="post" action="{% url 'nostalgia_app:submit_year' %}" class="graduation-form">
+<form id="grad-year-form" method="post" action="{% url 'nostalgia_app:submit_year' %}" class="graduation-form">
     {% csrf_token %}
     <select name="grad_year" required>
-        <option value="">Select a year</option> <!-- Add this line for the blank option -->
-        {% for year in years %}
-        <option value="{{ year }}">{{ year }}</option>
+        <option value="">Select a year</option>
+        {% for year in year_range %}
+            <option value="{{ year }}">{{ year }}</option>
         {% endfor %}
     </select>
     <button type="submit">Take Me Back in Time!</button>
@@ -28,4 +28,36 @@
         <li>Compare your memories with historical data</li>
     </ul>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('grad-year-form');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                localStorage.setItem('lastSearchedYear', data.grad_year);
+                window.location.href = "{% url 'nostalgia_app:results' grad_year=0 %}".replace('0', data.grad_year);
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    });
+});
+</script>
 {% endblock %}

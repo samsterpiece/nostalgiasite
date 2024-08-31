@@ -15,6 +15,7 @@ from django.core.cache import cache
 from django.views.decorators.http import require_http_methods
 import requests
 from .forms import FactReviewForm
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
@@ -23,17 +24,23 @@ def is_admin(user):
 
 def home(request):
     current_year = timezone.now().year
-    years = list(range(1930, current_year + 1))  # Generate a list of years from 1930 to the current year
-    return render(request, 'nostalgia_app/home.html', {'current_year': current_year, 'years': years})
+    year_range = range(1900, current_year + 1)
+    context = {
+        'year_range': year_range,
+        'current_year': current_year,
+    }
+    return render(request, 'nostalgia_app/home.html', context)
 
 def submit_year(request):
     if request.method == 'POST':
         grad_year = request.POST.get('grad_year')
         if grad_year:
-            return redirect('nostalgia_app:results', grad_year=grad_year)
+            # Store the grad_year in session
+            request.session['last_searched_year'] = grad_year
+            return JsonResponse({'success': True, 'grad_year': grad_year})
         else:
-            messages.error(request, "Please enter a valid graduation year.")
-    return redirect('nostalgia_app:home')
+            return JsonResponse({'success': False, 'error': 'Invalid graduation year'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 def results(request, grad_year):
     categories = Category.objects.all()
