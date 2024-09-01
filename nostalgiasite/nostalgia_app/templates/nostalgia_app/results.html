@@ -33,14 +33,30 @@
     <div id="facts-container" class="scrollable" style="display: none; max-height: 500px; overflow-y: auto;"></div>
 </div>
 
-<div class="significant-events">
+<div class="significant-events" id="significantEvents">
     <h3>Significant Events Since {{ grad_year }}</h3>
-    <ul id="significantEvents"></ul>
+     {% if significant_events %}
+        <ul>
+            {% for event in significant_events %}
+                <li>{{ event }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no significant events to display for this time period.</p>
+    {% endif %}
 </div>
 
-<div class="recommendations">
+<div class="recommendations" id="recommendedReading">
     <h3>Recommended Reading to Catch Up</h3>
-    <ul id="recommendedReading"></ul>
+     {% if recommended_reading %}
+        <ul>
+            {% for book in recommended_reading %}
+                <li>{{ book }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no reading recommendations for this time period.</p>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -126,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (events.length === 0) {
-            significantEvents.innerHTML = '<li>There are no significant events to display for this time period.</li>';
+            significantEvents.innerHTML = '<p>There are no significant events to display for this time period.</p>';
         }
     }
 
@@ -139,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if (books.length === 0) {
-            recommendedReading.innerHTML = '<li>There are no reading recommendations for this time period.</li>';
+            recommendedReading.innerHTML = '<p>There are no reading recommendations for this time period.</p>';
         }
     }
 
