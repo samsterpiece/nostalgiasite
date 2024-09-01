@@ -98,3 +98,19 @@ class UserSubmittedFact(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+
+class APIFact(models.Model):
+    year = models.IntegerField()
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    source_url = models.URLField()
+    categories = models.ManyToManyField(Category)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.year} - {self.title}"
+
+    class Meta:
+        unique_together = ('year', 'title')

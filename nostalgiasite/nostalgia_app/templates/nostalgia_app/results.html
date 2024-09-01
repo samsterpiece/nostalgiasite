@@ -1,105 +1,162 @@
 {% extends 'nostalgia_app/base.html' %}
+{% load static %}
 
 {% block title %}Knowledge Time Capsule: From {{ grad_year }} to 2024{% endblock %}
 
 {% block content %}
-<h2>Knowledge Time Capsule: From {{ grad_year }} to 2024</h2>
+<h1>Knowledge Time Capsule: From {{ grad_year }} to 2024</h1>
 
+<div id="error-message" style="display: none; color: red;"></div>
+
+{% if searched_years %}
 <div class="previous-searches">
     <h3>Previous Searches:</h3>
     <ul>
-        {% for year in searched_years %}
-            {% if year != grad_year %}
-                <li><a href="{% url 'nostalgia_app:results' grad_year=year %}">{{ year }}</a></li>
-            {% endif %}
-        {% endfor %}
+    {% for year in searched_years %}
+        <li><a href="{% url 'nostalgia_app:results' grad_year=year %}">{{ year }}</a></li>
+    {% endfor %}
     </ul>
 </div>
+{% endif %}
 
 <div class="category-selection">
     <h3>Select a Category to Explore:</h3>
-    <div class="category-buttons">
+    <div class="category-buttons" id="categoryButtons">
         {% for category in categories %}
-            <button class="category-button {% if category.name == selected_category %}active{% endif %}" data-category="{{ category.name }}">
-                {{ category.name }}
-            </button>
+            <button class="category-button" data-category="{{ category.name }}">{{ category.name }}</button>
         {% endfor %}
     </div>
 </div>
 
-<div id="facts-container" style="display: none;">
-    {% if facts %}
-        {% for fact in facts %}
-            <div class="fact-item">
-                <h4>{{ fact.year }} - {{ fact.title }}</h4>
-                <p>{{ fact.description }}</p>
-                <p>Categories: {{ fact.categories|join:", " }}</p>
-                <a href="{{ fact.source_url }}" target="_blank" rel="noopener noreferrer">Learn More</a>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No facts found for the selected category and time period.</p>
-    {% endif %}
+<div id="results-area">
+    <div id="loading" style="display: none;">Loading...</div>
+    <div id="facts-container" class="scrollable" style="display: none; max-height: 500px; overflow-y: auto;"></div>
 </div>
 
 <div class="significant-events">
     <h3>Significant Events Since {{ grad_year }}</h3>
-    {% if significant_events %}
-        <ul>
-            {% for event in significant_events %}
-                <li>{{ event }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>There are no significant events to display for this time period.</p>
-    {% endif %}
+    <ul id="significantEvents"></ul>
 </div>
 
 <div class="recommendations">
     <h3>Recommended Reading to Catch Up</h3>
-    {% if recommended_reading %}
-        <ul>
-            {% for book in recommended_reading %}
-                <li>{{ book }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>There are no reading recommendations for this time period.</p>
-    {% endif %}
+    <ul id="recommendedReading"></ul>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const categoryButtons = document.querySelectorAll('.category-button');
+    let activeCategory = null;
+    let allData = null;
     const factsContainer = document.getElementById('facts-container');
+    const loadingIndicator = document.getElementById('loading');
+    const significantEvents = document.getElementById('significantEvents');
+    const recommendedReading = document.getElementById('recommendedReading');
 
-    categoryButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const category = this.getAttribute('data-category');
+    function showLoading(show) {
+        loadingIndicator.style.display = show ? 'block' : 'none';
+        factsContainer.style.display = show ? 'none' : 'block';
+    }
 
-            // Remove active class from all buttons
-            categoryButtons.forEach(btn => btn.classList.remove('active'));
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
 
-            // Add active class to clicked button
-            this.classList.add('active');
+    function fetchAllData() {
+        showLoading(true);
+        const url = `{% url 'nostalgia_app:results_api' grad_year=grad_year %}`;
 
-            // Show facts container
-            factsContainer.style.display = 'block';
-
-            // Filter facts based on category
-            const facts = document.querySelectorAll('.fact-item');
-            facts.forEach(fact => {
-                if (fact.textContent.includes(category)) {
-                    fact.style.display = 'block';
-                } else {
-                    fact.style.display = 'none';
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then(data => {
+                allData = data;
+                showLoading(false);
+                populateSignificantEvents(data.significant_events);
+                populateRecommendedReading(data.recommended_reading);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(`Failed to fetch results: ${error.message}`);
+                showLoading(false);
             });
+    }
+
+    function filterAndDisplayFacts(category) {
+        if (!allData) return;
+
+        const filteredFacts = allData.facts.filter(fact =>
+            fact.categories.some(cat => cat.name === category)
+        );
+        populateFacts(filteredFacts);
+    }
+
+    function populateFacts(facts) {
+        factsContainer.innerHTML = '';
+        factsContainer.style.display = 'block';
+        facts.forEach(fact => {
+            const factItem = document.createElement('div');
+            factItem.classList.add('fact-item');
+            factItem.innerHTML = `
+                <h4>${fact.year} - ${fact.title}</h4>
+                <p>${fact.description}</p>
+                <a href="${fact.source_url}" target="_blank" rel="noopener noreferrer">Learn More</a>
+            `;
+            factsContainer.appendChild(factItem);
+        });
+
+        if (facts.length === 0) {
+            factsContainer.innerHTML = '<p>No facts found for the selected category and time period.</p>';
+        }
+    }
+
+    function populateSignificantEvents(events) {
+        significantEvents.innerHTML = '';
+        events.forEach(event => {
+            const li = document.createElement('li');
+            li.textContent = event;
+            significantEvents.appendChild(li);
+        });
+
+        if (events.length === 0) {
+            significantEvents.innerHTML = '<li>There are no significant events to display for this time period.</li>';
+        }
+    }
+
+    function populateRecommendedReading(books) {
+        recommendedReading.innerHTML = '';
+        books.forEach(book => {
+            const li = document.createElement('li');
+            li.textContent = book;
+            recommendedReading.appendChild(li);
+        });
+
+        if (books.length === 0) {
+            recommendedReading.innerHTML = '<li>There are no reading recommendations for this time period.</li>';
+        }
+    }
+
+    // Set up event listeners for category buttons
+    document.querySelectorAll('.category-button').forEach(button => {
+        button.addEventListener('click', function() {
+            if (activeCategory) {
+                activeCategory.classList.remove('active');
+            }
+            this.classList.add('active');
+            activeCategory = this;
+            filterAndDisplayFacts(this.dataset.category);
         });
     });
+
+    // Fetch all data when the page loads
+    fetchAllData();
 });
 </script>
 {% endblock %}

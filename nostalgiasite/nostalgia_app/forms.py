@@ -23,7 +23,9 @@ class FactSubmissionForm(forms.ModelForm):
         widget=forms.RadioSelect,
         required=True
     )
-    
+    description = forms.CharField(widget=forms.Textarea, min_length=1)
+
+
     class Meta:
         model = UserSubmittedFact
         fields = ['year', 'title', 'description', 'categories', 'source_url', 'notification_email', 'notification_phone']

@@ -9,7 +9,8 @@ app_name = 'nostalgia_app'
 urlpatterns = [
     path('', views.home, name='home'),
     path('submit-year/', views.submit_year, name='submit_year'),
-    path('results/<int:grad_year>/', views.results, name='results'),
+    path('results/<int:grad_year>/', views.results_view, name='results'),
+    path('api/results/<int:grad_year>/', views.results_api, name='results_api'),
     path('submit-fact/', views.submit_fact, name='submit_fact'),
     path('signup/', views.signup, name='signup'),
     path('login/', auth_views.LoginView.as_view(template_name='nostalgia_app/login.html'), name='login'),

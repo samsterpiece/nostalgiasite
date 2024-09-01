@@ -1,22 +1,30 @@
 from rest_framework import serializers
-from .models import Category, InformationItem, SignificantEvent, Book
+from .models import Category, UserSubmittedFact, APIFact
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'slug']
 
-class InformationItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InformationItem
-        fields = ['id', 'title', 'description', 'year', 'category', 'is_outdated', 'current_status', 'change_description', 'relevance_explanation']
+class UserSubmittedFactSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True, read_only=True)
 
-class SignificantEventSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SignificantEvent
-        fields = ['id', 'title', 'description', 'year', 'impact']
+        model = UserSubmittedFact
+        fields = ['id', 'year', 'title', 'description', 'categories', 'source_url', 'status', 'submitted_at']
 
-class BookSerializer(serializers.ModelSerializer):
+class APIFactSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True, read_only=True)
+
     class Meta:
-        model = Book
-        fields = ['id', 'title', 'author', 'description', 'year', 'category', 'relevance']
+        model = APIFact
+        fields = ['id', 'year', 'title', 'description', 'categories', 'source_url', 'created_at', 'updated_at']
+
+class CombinedFactSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    year = serializers.IntegerField()
+    title = serializers.CharField()
+    description = serializers.CharField()
+    categories = CategorySerializer(many=True)
+    source_url = serializers.URLField()
+    fact_type = serializers.CharField()  # To distinguish between UserSubmittedFact and APIFact

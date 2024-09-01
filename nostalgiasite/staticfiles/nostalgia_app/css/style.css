@@ -1,7 +1,6 @@
 /* style.css */
 body {
     font-family: "Comic Sans MS", cursive, sans-serif;
-    background: #000000 url('/static/images/stars.gif');
     color: #00FF00;
     max-width: 800px;
     margin: 0 auto;
