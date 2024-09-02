@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from django.db.migrations.writer import MigrationWriter
 from .migration_writer import CustomMigrationWriter
 
 MigrationWriter = CustomMigrationWriter
@@ -22,6 +21,26 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 LOGIN_REDIRECT_URL = 'nostalgia_app:home'
 LOGIN_URL = 'nostalgia_app:login'
+
+# Celery settings
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_RESULT_BACKEND = 'rpc://'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+# Increase timeout for external API calls
+CELERY_TASK_TIME_LIMIT = 300  # 5 minutes
+CELERY_TASK_SOFT_TIME_LIMIT = 240  # 4 minutes
+
+# RabbitMQ specific settings
+CELERY_BROKER_CONNECTION_RETRY = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
+
+# Google Books API key
+GOOGLE_BOOKS_API_KEY = os.getenv('GOOGLE_BOOKS_API_KEY')
 
 # Application definition
 INSTALLED_APPS = [

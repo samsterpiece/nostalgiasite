@@ -11,168 +11,44 @@
 {% if searched_years %}
 <div class="previous-searches">
     <h3>Previous Searches:</h3>
-    <ul>
-    {% for year in searched_years %}
-        <li><a href="{% url 'nostalgia_app:results' grad_year=year %}">{{ year }}</a></li>
-    {% endfor %}
-    </ul>
+    <div class="search-years">
+        {% for year in searched_years %}
+            <a href="{% url 'nostalgia_app:results' grad_year=year %}" class="search-year">{{ year }}</a>
+        {% endfor %}
+    </div>
 </div>
 {% endif %}
 
 <div class="category-selection">
     <h3>Select a Category to Explore:</h3>
-    <div class="category-buttons" id="categoryButtons">
+    <div id="categoryButtons" class="category-buttons">
         {% for category in categories %}
-            <button class="category-button" data-category="{{ category.name }}">{{ category.name }}</button>
+            <button class="category-button" data-category="{{ category.slug }}">{{ category.name }}</button>
         {% endfor %}
     </div>
 </div>
 
+<h3>Interesting Facts From {{ grad_year }}</h3>
 <div id="results-area">
     <div id="loading" style="display: none;">Loading...</div>
-    <div id="facts-container" class="scrollable" style="display: none; max-height: 500px; overflow-y: auto;"></div>
+    <div id="facts-container" class="scrollable content-box"></div>
 </div>
 
-<div class="significant-events" id="significantEvents">
-    <h3>Significant Events Since {{ grad_year }}</h3>
-     {% if significant_events %}
-        <ul>
-            {% for event in significant_events %}
-                <li>{{ event }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>There are no significant events to display for this time period.</p>
-    {% endif %}
+<h3>Significant Events Since {{ grad_year }}</h3>
+<div id="significantEvents" class="significant-events content-box">
+    <div id="significant-events-list"></div>
 </div>
 
-<div class="recommendations" id="recommendedReading">
-    <h3>Recommended Reading to Catch Up</h3>
-     {% if recommended_reading %}
-        <ul>
-            {% for book in recommended_reading %}
-                <li>{{ book }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>There are no reading recommendations for this time period.</p>
-    {% endif %}
+<h3>Recommended Reading to Catch Up</h3>
+<div id="recommendedReading" class="recommendations content-box">
+    <div id="recommended-reading-list"></div>
 </div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    let activeCategory = null;
-    let allData = null;
-    const factsContainer = document.getElementById('facts-container');
-    const loadingIndicator = document.getElementById('loading');
-    const significantEvents = document.getElementById('significantEvents');
-    const recommendedReading = document.getElementById('recommendedReading');
-
-    function showLoading(show) {
-        loadingIndicator.style.display = show ? 'block' : 'none';
-        factsContainer.style.display = show ? 'none' : 'block';
-    }
-
-    function showError(message) {
-        const errorDiv = document.getElementById('error-message');
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-    }
-
-    function fetchAllData() {
-        showLoading(true);
-        const url = `{% url 'nostalgia_app:results_api' grad_year=grad_year %}`;
-
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                allData = data;
-                showLoading(false);
-                populateSignificantEvents(data.significant_events);
-                populateRecommendedReading(data.recommended_reading);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError(`Failed to fetch results: ${error.message}`);
-                showLoading(false);
-            });
-    }
-
-    function filterAndDisplayFacts(category) {
-        if (!allData) return;
-
-        const filteredFacts = allData.facts.filter(fact =>
-            fact.categories.some(cat => cat.name === category)
-        );
-        populateFacts(filteredFacts);
-    }
-
-    function populateFacts(facts) {
-        factsContainer.innerHTML = '';
-        factsContainer.style.display = 'block';
-        facts.forEach(fact => {
-            const factItem = document.createElement('div');
-            factItem.classList.add('fact-item');
-            factItem.innerHTML = `
-                <h4>${fact.year} - ${fact.title}</h4>
-                <p>${fact.description}</p>
-                <a href="${fact.source_url}" target="_blank" rel="noopener noreferrer">Learn More</a>
-            `;
-            factsContainer.appendChild(factItem);
-        });
-
-        if (facts.length === 0) {
-            factsContainer.innerHTML = '<p>No facts found for the selected category and time period.</p>';
-        }
-    }
-
-    function populateSignificantEvents(events) {
-        significantEvents.innerHTML = '';
-        events.forEach(event => {
-            const li = document.createElement('li');
-            li.textContent = event;
-            significantEvents.appendChild(li);
-        });
-
-        if (events.length === 0) {
-            significantEvents.innerHTML = '<p>There are no significant events to display for this time period.</p>';
-        }
-    }
-
-    function populateRecommendedReading(books) {
-        recommendedReading.innerHTML = '';
-        books.forEach(book => {
-            const li = document.createElement('li');
-            li.textContent = book;
-            recommendedReading.appendChild(li);
-        });
-
-        if (books.length === 0) {
-            recommendedReading.innerHTML = '<p>There are no reading recommendations for this time period.</p>';
-        }
-    }
-
-    // Set up event listeners for category buttons
-    document.querySelectorAll('.category-button').forEach(button => {
-        button.addEventListener('click', function() {
-            if (activeCategory) {
-                activeCategory.classList.remove('active');
-            }
-            this.classList.add('active');
-            activeCategory = this;
-            filterAndDisplayFacts(this.dataset.category);
-        });
-    });
-
-    // Fetch all data when the page loads
-    fetchAllData();
-});
+    const grad_year = {{ grad_year }};
 </script>
+<script src="{% static 'nostalgia_app/js/main.js' %}"></script>
 {% endblock %}

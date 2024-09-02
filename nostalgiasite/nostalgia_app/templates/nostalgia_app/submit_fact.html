@@ -1,44 +1,105 @@
 {% extends 'nostalgia_app/base.html' %}
-
+{% load static %}
 {% block title %}Submit a Fact - Nostalgia Site{% endblock %}
-
 {% block content %}
-<div class="submit-fact-container">
-    <h2>Submit a New Fact</h2>
-    <p>Help us expand our knowledge base by submitting a fact about a specific year. Our team will review your submission before it's added to the site.</p>
 
-    <form method="post" class="fact-form">
+<div class="submit-fact-container container mt-5">
+    <h2 class="mb-4">Submit a New Fact</h2>
+
+    <p class="mb-4">Help us expand our knowledge base by submitting a fact about a specific year. Our team will review your submission before it's added to the site.</p>
+
+    <form method="post" id="factSubmissionForm" action="{% url 'nostalgia_app:submit_fact' %}">
         {% csrf_token %}
-        {% for field in form %}
-        {% if field.name != 'categories' %}
-        <div class="form-group">
-            {{ field.label_tag }}
-            {{ field }}
-            {% if field.help_text %}
-            <small class="form-text text-muted">{{ field.help_text }}</small>
-            {% endif %}
-            {% for error in field.errors %}
-            <div class="error">{{ error }}</div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="form-group">
-            <label>Categories (select at least one):</label>
-            <div class="category-options">
-                {% for category in form.categories.field.queryset %}
-                <label class="category-checkbox">
-                    <input type="checkbox" name="categories" value="{{ category.id }}" {% if category.id in form.categories.value %}checked{% endif %}>
-                    {{ category.name }}
-                </label>
+
+        <p>Year Range: {{ year_range }}</p>
+
+
+        <!-- Year Field -->
+        <div class="form-group mb-3">
+            <label for="year">Select a Year</label>
+            <select name="year" id="year" required class="form-control">
+                <option value="">Select a year</option>
+                {% for year in year_range %}
+                    <option value="{{ year }}">{{ year }}</option>
                 {% endfor %}
-            </div>
-            {% for error in field.errors %}
-            <div class="error">{{ error }}</div>
-            {% endfor %}
+            </select>
         </div>
-        {% endif %}
+
+        <!-- Other Fields -->
+        {% for field in form %}
+            {% if field.name != 'year' and field.name != 'categories' and field.name != 'want_notification' and field.name != 'notification_preference' and field.name != 'notification_email' and field.name != 'notification_phone' %}
+                <div class="form-group mb-3">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error text-danger">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% elif field.name == 'categories' %}
+                <div class="form-group mb-3">
+                    <label>Categories (select at least one):</label>
+                    <div class="category-options">
+                        {% for category in form.categories.field.queryset %}
+                            <div class="form-check">
+                                <input type="checkbox" name="categories" value="{{ category.id }}" id="category_{{ category.id }}" class="form-check-input">
+                                <label class="form-check-label" for="category_{{ category.id }}">
+                                    {{ category.name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% for error in field.errors %}
+                        <div class="error text-danger">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endfor %}
-        <button type="submit" class="submit-button">Submit Fact</button>
+
+        <div class="form-group mb-3">
+            <label>Do you want to be notified of the decision?</label>
+            <div>
+                <div class="form-check">
+                    <input type="radio" name="want_notification" id="notify_yes" value="yes" class="form-check-input">
+                    <label class="form-check-label" for="notify_yes">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" name="want_notification" id="notify_no" value="no" class="form-check-input" checked>
+                    <label class="form-check-label" for="notify_no">No</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-fields" style="display: none;">
+            <div class="form-group mb-3">
+                <label for="notification_preference">How would you like to be notified?</label>
+                <select name="notification_preference" id="notification_preference" class="form-control">
+                    <option value="email">Email</option>
+                    <option value="phone">Phone</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="notification_email">Email for notification</label>
+                <input type="email" name="notification_email" id="notification_email" class="form-control">
+            </div>
+            <div class="form-group mb-3">
+                <label for="notification_phone">Phone number for notification</label>
+                <input type="tel" name="notification_phone" id="notification_phone" class="form-control">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Fact</button>
     </form>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'nostalgia_app/js/submit_fact.js' %}"></script>
 {% endblock %}

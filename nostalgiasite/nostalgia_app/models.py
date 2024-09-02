@@ -5,6 +5,7 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
@@ -12,13 +13,14 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
+        super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
     class Meta:
         verbose_name_plural = "Categories"
+
 
 class InformationItem(models.Model):
     title = models.CharField(max_length=200)
@@ -37,6 +39,7 @@ class InformationItem(models.Model):
     def __str__(self):
         return f"{self.year} - {self.title}"
 
+
 class SignificantEvent(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -47,6 +50,7 @@ class SignificantEvent(models.Model):
     def __str__(self):
         return f"{self.year} - {self.title}"
 
+
 class Book(models.Model):
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=100)
@@ -54,11 +58,13 @@ class Book(models.Model):
     year = models.IntegerField()
     categories = models.ManyToManyField(Category, related_name='books')
     relevance = models.TextField()
+    source_url = models.URLField()
     isbn = models.CharField(max_length=13, blank=True)
     cover_url = models.URLField(blank=True)
 
     def __str__(self):
         return f"{self.title} by {self.author}"
+
 
 class UserSubmittedFact(models.Model):
     STATUS_CHOICES = [
@@ -84,10 +90,14 @@ class UserSubmittedFact(models.Model):
 
     def __str__(self):
         return f"{self.year} - {self.title} (Submitted by {self.user.username})"
-    
+
     def clean(self):
-        if self.year < 1900 or self.year > timezone.now().year:
-            raise ValidationError("Year must be between 1900 and the current year.")
+        if self.year is not None:
+            if self.year < 1900 or self.year > timezone.now().year:
+                raise ValidationError("Year must be between 1900 and the current year.")
+        else:
+            raise ValidationError("Year must be provided.")
+
         if not self.notification_email and not self.notification_phone:
             raise ValidationError("Please provide either an email or phone number for notifications.")
 

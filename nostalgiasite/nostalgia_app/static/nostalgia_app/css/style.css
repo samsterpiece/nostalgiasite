@@ -134,13 +134,117 @@ button:hover {
     color: #000080;
 }
 
-/* Fact Styles */
-.fact-item, .significant-events, .recommendations {
+.category-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.category-option {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.form-check-inline {
+    display: inline-flex;
+    align-items: center;
+    padding-left: 0;
+    margin-right: 0.75rem;
+}
+
+.form-check-input {
+    margin-top: 0;
+    margin-right: 0.3125rem;
+}
+
+.form-check-label {
+    margin-bottom: 0;
+}
+
+/* Form Styles */
+.submit-fact-container {
+    background-color: #000080;
+    border: 3px dashed #FFFF00;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    background-color: #000000;
+    border: 2px solid #00FF00;
+    color: #00FF00;
+    padding: 5px;
+    font-family: "Courier New", monospace;
+}
+
+.btn-primary {
+    background-color: #FF00FF;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.btn-primary:hover {
+    background-color: #00FFFF;
+    color: #000000;
+}
+
+/* Content Box Styles */
+.content-box {
     background-color: #000080;
     border: 2px solid #00FF00;
     padding: 15px;
     margin-bottom: 15px;
     text-align: left;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Previous Searches Styles */
+.previous-searches {
+    background-color: #000080;
+    border: 2px solid #00FF00;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.search-years {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.search-year {
+    background-color: #000080;
+    color: #FFFF00;
+    padding: 5px 10px;
+    text-decoration: none;
+    border: 1px solid #FFFF00;
+}
+
+.search-year:hover {
+    background-color: #FFFF00;
+    color: #000080;
+}
+
+/* Fact, Event, and Book Styles */
+.fact-item, .event-item, .book-item {
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #00FF00;
+    padding-bottom: 10px;
+}
+
+.fact-item:last-child, .event-item:last-child, .book-item:last-child {
+    border-bottom: none;
 }
 
 /* Under Construction */
@@ -154,89 +258,4 @@ button:hover {
     font-weight: bold;
     transform: rotate(15deg);
     z-index: 1000;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-    body {
-        padding: 10px;
-    }
-
-    nav ul {
-        flex-direction: column;
-    }
-
-    nav ul li {
-        margin: 5px 0;
-    }
-
-    .category-buttons {
-        flex-direction: column;
-    }
-
-    .category-button {
-        width: 100%;
-    }
-}
-
-/* Accessibility */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-}
-
-footer {
-    margin-top: auto;
-    padding: 20px;
-    background-color: #000080;
-    border-top: 3px dashed #FFFF00;
-}
-
-.previous-searches {
-    background-color: #000080;
-    border: 2px solid #00FF00;
-    padding: 15px;
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.previous-searches h3 {
-    color: #FF00FF;
-    text-shadow: 1px 1px #0000FF;
-    margin-top: 0;
-}
-
-.previous-searches ul {
-    list-style-type: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.previous-searches li a {
-    display: inline-block;
-    padding: 5px 10px;
-    background-color: #000080;
-    color: #FFFF00;
-    text-decoration: none;
-    border: 1px solid #FFFF00;
-}
-
-.previous-searches li a:hover {
-    background-color: #FFFF00;
-    color: #000080;
-}
-
-@media (max-width: 600px) {
-    .previous-searches ul {
-        flex-direction: column;
-    }
 }
