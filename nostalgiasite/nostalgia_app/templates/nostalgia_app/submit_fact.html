@@ -1,27 +1,34 @@
 {% extends 'nostalgia_app/base.html' %}
 {% load static %}
-{% block title %}Submit a Fact - Nostalgia Site{% endblock %}
-{% block content %}
 
+{% block title %}Submit a Fact - Nostalgia Site{% endblock %}
+
+{% block content %}
 <div class="submit-fact-container container mt-5">
     <h2 class="mb-4">Submit a New Fact</h2>
-
     <p class="mb-4">Help us expand our knowledge base by submitting a fact about a specific year. Our team will review your submission before it's added to the site.</p>
 
     <form method="post" id="factSubmissionForm" action="{% url 'nostalgia_app:submit_fact' %}">
         {% csrf_token %}
-
-        <p>Year Range: {{ year_range }}</p>
-
-
         <!-- Year Field -->
         <div class="form-group mb-3">
-            <label for="year">Select a Year</label>
+            <label for="year">Year:</label>
             <select name="year" id="year" required class="form-control">
+                <!-- Placeholder option -->
                 <option value="">Select a year</option>
-                {% for year in year_range %}
-                    <option value="{{ year }}">{{ year }}</option>
-                {% endfor %}
+                <script>
+                    let dateDropdown = document.getElementById('year');  // Get the dropdown element
+                    const currentYear = new Date().getFullYear();  // Get the current year
+                    const earliestYear = 1900;  // Set the earliest year to 1900
+
+                    // Loop from the earliest year to the current year
+                    for (let year = earliestYear; year <= currentYear; year++) {
+                        let dateOption = document.createElement('option');  // Create a new option element
+                        dateOption.text = year;  // Set the text (visible part) of the option
+                        dateOption.value = year;  // Set the value (value attribute) of the option
+                        dateDropdown.add(dateOption);  // Add the option to the dropdown
+                    }
+                </script>
             </select>
         </div>
 
@@ -97,9 +104,8 @@
         <button type="submit" class="btn btn-primary">Submit Fact</button>
     </form>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'nostalgia_app/js/submit_fact.js' %}"></script>
+<script src="{% static 'nostalgia_app/js/main.js' %}"></script>
 {% endblock %}

@@ -237,15 +237,13 @@ def submit_fact(request):
         form = FactSubmissionForm()
 
     categories = Category.objects.all()
-    current_year = timezone.now().year
-    year_range = range(1900, current_year + 1)
+
     context = {
         'form': form,
         'categories': categories,
-        'year_range': year_range,
     }
 
-    return render(request, 'nostalgiasite/nostalgia_app/templates/nostalgia_app/submit_fact.html', context)
+    return render(request, 'nostalgia_app/submit_fact.html', context)
 
 @login_required
 def submit_fact(request):
